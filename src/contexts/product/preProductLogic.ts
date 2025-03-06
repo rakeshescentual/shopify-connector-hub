@@ -180,6 +180,9 @@ const generateProductTags = (product: Product): void => {
 
 /**
  * Updates the quick buy status based on variant conditions
+ * Note: This just sets up the tag for the PreProduct app to use later.
+ * The actual implementation of disabling buy buttons, bypassing quick buy,
+ * setting inventory policy, etc. is handled by the PreProduct app.
  */
 const updateQuickBuyStatus = (product: Product): void => {
   const hasMultipleVariants = product.variants.length > 1;
@@ -197,8 +200,7 @@ const updateQuickBuyStatus = (product: Product): void => {
   
   // Set auto_quickbuydisable to "yes" if:
   // 1. The product has multiple variants AND
-  // 2. At least one variant is out of stock AND
-  // 3. That out-of-stock variant has a preproduct metafield set to "yes"
+  // 2. At least one variant is out of stock AND has a preproduct metafield set to "yes"
   product.auto_quickbuydisable = (hasMultipleVariants && hasOutOfStockVariantWithPreProduct) 
     ? 'yes' 
     : 'no';
