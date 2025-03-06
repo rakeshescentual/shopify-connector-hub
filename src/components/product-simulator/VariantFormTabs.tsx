@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
@@ -12,6 +11,14 @@ const VariantFormTabs = () => {
   const { editableVariant, handleVariantChange } = useProductContext();
 
   if (!editableVariant) return <div>Loading variant...</div>;
+  
+  const handleMetafieldChange = (key: string, value: string | number) => {
+    if (key === 'custom.ordering_min_qty') {
+      handleVariantChange(`metafields.${key}`, typeof value === 'number' ? value : parseInt(String(value)) || 0);
+    } else {
+      handleVariantChange(`metafields.${key}`, String(value));
+    }
+  };
 
   return (
     <Tabs defaultValue="basic">
@@ -35,8 +42,8 @@ const VariantFormTabs = () => {
           <div>
             <Label htmlFor="variant-discontinued">Discontinued Status</Label>
             <Select 
-              value={editableVariant.metafields['custom.discontinued']}
-              onValueChange={(value) => handleVariantChange('metafields.custom.discontinued', value)}
+              value={String(editableVariant.metafields['custom.discontinued'])}
+              onValueChange={(value) => handleMetafieldChange('custom.discontinued', value)}
             >
               <SelectTrigger id="variant-discontinued">
                 <SelectValue placeholder="Select status" />
@@ -79,7 +86,7 @@ const VariantFormTabs = () => {
               id="variant-min-qty"
               type="number" 
               value={editableVariant.metafields['custom.ordering_min_qty']} 
-              onChange={(e) => handleVariantChange('metafields.custom.ordering_min_qty', parseInt(e.target.value))} 
+              onChange={(e) => handleMetafieldChange('custom.ordering_min_qty', parseInt(e.target.value))} 
             />
           </div>
           
@@ -129,8 +136,8 @@ const VariantFormTabs = () => {
                   {key.replace('auto_', '')}
                 </Label>
                 <Select 
-                  value={value}
-                  onValueChange={(newValue) => handleVariantChange(`metafields.${key}`, newValue)}
+                  value={String(value)}
+                  onValueChange={(newValue) => handleMetafieldChange(key, newValue)}
                 >
                   <SelectTrigger id={`variant-${key}`} className="w-20">
                     <SelectValue />
