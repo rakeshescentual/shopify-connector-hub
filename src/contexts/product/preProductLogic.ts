@@ -1,4 +1,3 @@
-
 import { Product, ProductVariant, DiscontinuedValue } from './types';
 import { isDiscontinued, getMetafieldTags } from './utils';
 import { toast } from '@/components/ui/use-toast';
@@ -129,6 +128,7 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
   }
   
   // Priority 5: Check for backorder conditions
+  // Fix the type comparison by ensuring discontinuedValue is properly typed
   if (variant.inventory <= 0 && 
       discontinuedValue !== 'By Manufacturer' && 
       discontinuedValue !== 'Delisted') {
