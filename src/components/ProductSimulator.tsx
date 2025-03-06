@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -276,7 +277,8 @@ const ProductSimulator = () => {
         if (metafieldKey === 'custom.ordering_min_qty') {
           updatedMetafields[metafieldKey] = typeof value === 'number' ? value : parseInt(value) || 0;
         } else {
-          (updatedMetafields as any)[metafieldKey] = value;
+          // Use type assertion to tell TypeScript this is safe
+          (updatedMetafields as Record<string, string | number>)[metafieldKey] = value;
         }
         
         return {
