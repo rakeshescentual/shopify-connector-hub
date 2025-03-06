@@ -1,11 +1,11 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, AlertCircle, CheckCircle, Clock, Info } from 'lucide-react';
+import { Plus, AlertCircle, CheckCircle, Clock, Info, Search } from 'lucide-react';
 import { useProductContext } from '@/contexts/ProductContext';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 const VariantSelector = () => {
   const { 
@@ -14,6 +14,8 @@ const VariantSelector = () => {
     setSelectedVariantId, 
     addVariant
   } = useProductContext();
+
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Helper function to render status icon
   const getStatusIcon = (status?: string) => {
@@ -89,60 +91,97 @@ const VariantSelector = () => {
     });
   };
 
+  // Filter variants based on search query
+  const filteredVariants = product.variants.filter(variant => 
+    variant.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="flex gap-4 mb-6">
-      <div className="w-3/4">
-        <Select value={selectedVariantId} onValueChange={setSelectedVariantId}>
-          <SelectTrigger className="bg-background/80 backdrop-blur-sm border-primary/20">
-            <SelectValue placeholder="Select variant" />
-          </SelectTrigger>
-          <SelectContent>
-            {product.variants.map(variant => (
-              <SelectItem key={variant.id} value={variant.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="flex-shrink-0">{getStatusIcon(variant.status)}</span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{getStatusTooltip(variant.status)}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  
-                  <span className="flex items-center gap-1">
-                    {variant.title}
-                    {getInventoryBadge(variant)}
-                  </span>
+    <div className="flex flex-col gap-4 mb-6">
+      <div className="flex gap-4">
+        <div className="w-3/4">
+          <Select value={selectedVariantId} onValueChange={setSelectedVariantId}>
+            <SelectTrigger className="bg-background/80 backdrop-blur-sm border-primary/20">
+              <SelectValue placeholder="Select variant" />
+            </SelectTrigger>
+            <SelectContent>
+              {searchQuery.length > 0 && filteredVariants.length === 0 && (
+                <div className="py-2 px-3 text-sm text-muted-foreground">
+                  No variants match your search
                 </div>
-                
-                {variant.lastUpdated && (
-                  <span className="text-xs text-muted-foreground ml-2">
-                    ({formatTimestamp(variant.lastUpdated)})
-                  </span>
-                )}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              )}
+              
+              <div className="p-2 sticky top-0 bg-background z-10">
+                <div className="relative">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search variants..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8 h-9"
+                  />
+                </div>
+              </div>
+              
+              {(searchQuery.length > 0 ? filteredVariants : product.variants).map(variant => (
+                <SelectItem key={variant.id} value={variant.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex-shrink-0">{getStatusIcon(variant.status)}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{getStatusTooltip(variant.status)}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    <span className="flex items-center gap-1">
+                      {variant.title}
+                      {getInventoryBadge(variant)}
+                    </span>
+                  </div>
+                  
+                  {variant.lastUpdated && (
+                    <span className="text-xs text-muted-foreground ml-2">
+                      ({formatTimestamp(variant.lastUpdated)})
+                    </span>
+                  )}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="w-1/4 bg-background/80 backdrop-blur-sm border-primary/20 hover:bg-primary/10" 
+                onClick={addVariant}
+              >
+                <Plus className="h-4 w-4 mr-1" /> Add
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Add a new variant to test different product conditions</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button 
-              variant="outline" 
-              className="w-1/4 bg-background/80 backdrop-blur-sm border-primary/20 hover:bg-primary/10" 
-              onClick={addVariant}
-            >
-              <Plus className="h-4 w-4 mr-1" /> Add
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Add a new variant to test different product conditions</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      
+      {product.variants.length > 5 && (
+        <div className="text-xs text-muted-foreground flex items-center gap-1">
+          <Info className="h-3 w-3" />
+          <span>
+            {product.variants.length} variants available. 
+            {searchQuery && filteredVariants.length < product.variants.length && 
+              `Showing ${filteredVariants.length} matches for "${searchQuery}".`
+            }
+          </span>
+        </div>
+      )}
     </div>
   );
 };
