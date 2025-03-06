@@ -25,16 +25,16 @@ const VariantFormTabs = () => {
   return (
     <TooltipProvider>
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="mb-6 w-full grid grid-cols-3">
-          <TabsTrigger value="basic" className="flex items-center gap-2">
+        <TabsList className="mb-6 w-full grid grid-cols-3 bg-background/50 backdrop-blur-sm">
+          <TabsTrigger value="basic" className="flex items-center gap-2 data-[state=active]:bg-white/70">
             <Tag size={16} />
             <span>Basic Info</span>
           </TabsTrigger>
-          <TabsTrigger value="inventory" className="flex items-center gap-2">
+          <TabsTrigger value="inventory" className="flex items-center gap-2 data-[state=active]:bg-white/70">
             <Package size={16} />
             <span>Inventory</span>
           </TabsTrigger>
-          <TabsTrigger value="metafields" className="flex items-center gap-2">
+          <TabsTrigger value="metafields" className="flex items-center gap-2 data-[state=active]:bg-white/70">
             <Info size={16} />
             <span>Metafields</span>
           </TabsTrigger>
@@ -44,12 +44,12 @@ const VariantFormTabs = () => {
           <div className="space-y-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Label htmlFor="variant-title">Variant Title</Label>
+                <Label htmlFor="variant-title" className="text-sm font-medium">Variant Title</Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Info size={14} className="text-muted-foreground cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent side="right">
                     The title displayed for this product variant
                   </TooltipContent>
                 </Tooltip>
@@ -58,18 +58,18 @@ const VariantFormTabs = () => {
                 id="variant-title"
                 value={editableVariant.title} 
                 onChange={(e) => handleVariantChange('title', e.target.value)} 
-                className="transition-all focus:ring-1"
+                className="transition-all focus:ring-1 bg-white/70"
               />
             </div>
             
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Label htmlFor="variant-discontinued">Discontinued Status</Label>
+                <Label htmlFor="variant-discontinued" className="text-sm font-medium">Discontinued Status</Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Info size={14} className="text-muted-foreground cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent side="right">
                     Set the discontinued status for this variant
                   </TooltipContent>
                 </Tooltip>
@@ -78,7 +78,7 @@ const VariantFormTabs = () => {
                 value={String(editableVariant.metafields['custom.discontinued'])}
                 onValueChange={(value) => handleMetafieldChange('custom.discontinued', value)}
               >
-                <SelectTrigger id="variant-discontinued" className="w-full">
+                <SelectTrigger id="variant-discontinued" className="w-full bg-white/70">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -91,12 +91,12 @@ const VariantFormTabs = () => {
             
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Label htmlFor="variant-launchdate">Launch Date</Label>
+                <Label htmlFor="variant-launchdate" className="text-sm font-medium">Launch Date</Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Calendar size={14} className="text-muted-foreground cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent side="right">
                     Set for future launches to enable pre-order status
                   </TooltipContent>
                 </Tooltip>
@@ -106,7 +106,7 @@ const VariantFormTabs = () => {
                 type="date" 
                 value={editableVariant.launchDate || ''} 
                 onChange={(e) => handleVariantChange('launchDate', e.target.value || null)} 
-                className="transition-all focus:ring-1"
+                className="transition-all focus:ring-1 bg-white/70"
               />
             </div>
           </div>
@@ -117,12 +117,12 @@ const VariantFormTabs = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <Label htmlFor="variant-inventory">Current Inventory</Label>
+                  <Label htmlFor="variant-inventory" className="text-sm font-medium">Current Inventory</Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Info size={14} className="text-muted-foreground cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent side="right">
                       Available quantity in stock
                     </TooltipContent>
                   </Tooltip>
@@ -132,18 +132,18 @@ const VariantFormTabs = () => {
                   type="number" 
                   value={editableVariant.inventory} 
                   onChange={(e) => handleVariantChange('inventory', parseInt(e.target.value) || 0)} 
-                  className="transition-all focus:ring-1"
+                  className="transition-all focus:ring-1 bg-white/70"
                 />
               </div>
               
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <Label htmlFor="variant-min-qty">Minimum Order Quantity</Label>
+                  <Label htmlFor="variant-min-qty" className="text-sm font-medium">Minimum Order Quantity</Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Info size={14} className="text-muted-foreground cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent side="right">
                       Minimum purchase quantity required
                     </TooltipContent>
                   </Tooltip>
@@ -153,12 +153,12 @@ const VariantFormTabs = () => {
                   type="number" 
                   value={editableVariant.metafields['custom.ordering_min_qty']} 
                   onChange={(e) => handleMetafieldChange('custom.ordering_min_qty', parseInt(e.target.value))} 
-                  className="transition-all focus:ring-1"
+                  className="transition-all focus:ring-1 bg-white/70"
                 />
               </div>
             </div>
             
-            <div className="p-4 bg-muted/50 rounded-md border border-border">
+            <div className="p-4 bg-white/70 rounded-md border border-border">
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="variant-had-stock" className="text-sm font-medium">Had Stock Before</Label>
@@ -176,12 +176,12 @@ const VariantFormTabs = () => {
             
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Label htmlFor="variant-backorder-weeks">Weeks in Backorder</Label>
+                <Label htmlFor="variant-backorder-weeks" className="text-sm font-medium">Weeks in Backorder</Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <AlertCircle size={14} className="text-muted-foreground cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent side="right">
                     Number of consecutive weeks this item has been in backorder
                   </TooltipContent>
                 </Tooltip>
@@ -191,7 +191,7 @@ const VariantFormTabs = () => {
                 type="number" 
                 value={editableVariant.backorderWeeks} 
                 onChange={(e) => handleVariantChange('backorderWeeks', parseInt(e.target.value) || 0)} 
-                className="transition-all focus:ring-1"
+                className="transition-all focus:ring-1 bg-white/70"
               />
               <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
                 <AlertCircle size={14} />
@@ -203,8 +203,8 @@ const VariantFormTabs = () => {
         
         <TabsContent value="metafields" className="space-y-5 animate-fade-in">
           <div className="space-y-5">
-            <div className="flex items-start p-3 bg-amber-50 rounded-md mb-4 border border-amber-200">
-              <Info size={16} className="mr-2 text-amber-500 mt-0.5" />
+            <div className="flex items-start p-3 bg-amber-50/70 backdrop-blur-sm rounded-md mb-4 border border-amber-200">
+              <Info size={16} className="mr-2 text-amber-500 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-amber-800">
                 These fields are normally auto-calculated, but you can override them for testing
               </p>
@@ -214,16 +214,16 @@ const VariantFormTabs = () => {
               {Object.entries(editableVariant.metafields)
                 .filter(([key]) => key.startsWith('auto_preproduct_preorder'))
                 .map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between p-2 bg-muted/40 rounded-md border border-border">
+                  <div key={key} className="flex items-center justify-between p-2.5 bg-white/70 rounded-md border border-border hover:bg-white/90 transition-colors">
                     <div className="flex items-center gap-2">
-                      <Label htmlFor={`variant-${key}`} className="text-sm">
+                      <Label htmlFor={`variant-${key}`} className="text-sm font-medium">
                         {key.replace('auto_', '').replace(/_/g, ' ')}
                       </Label>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Info size={14} className="text-muted-foreground cursor-help" />
                         </TooltipTrigger>
-                        <TooltipContent>
+                        <TooltipContent side="right">
                           {key === 'auto_preproduct_preorder' && 'General pre-order status'}
                           {key === 'auto_preproduct_preorder_launch' && 'Future launch date pre-order'}
                           {key === 'auto_preproduct_preorder_specialorder' && 'Special order status'}
@@ -238,12 +238,12 @@ const VariantFormTabs = () => {
                       value={String(value)}
                       onValueChange={(newValue) => handleMetafieldChange(key, newValue)}
                     >
-                      <SelectTrigger id={`variant-${key}`} className="w-24">
+                      <SelectTrigger id={`variant-${key}`} className="w-28 bg-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="yes">Yes</SelectItem>
-                        <SelectItem value="no">No</SelectItem>
+                        <SelectItem value="yes" className="text-green-600 font-medium">Yes</SelectItem>
+                        <SelectItem value="no" className="text-red-600 font-medium">No</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
