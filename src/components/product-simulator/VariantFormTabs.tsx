@@ -95,7 +95,7 @@ const VariantFormTabs = () => {
                       <p><strong>By Manufacturer</strong>: Not Available from supplier</p>
                       <p><strong>By Us</strong>: Available but marked down</p>
                       <p><strong>Special Order</strong>: Available, slow sales, min order qty = 1</p>
-                      <p><strong>Delisted</strong>: Available, slow sales, min order qty > 1</p>
+                      <p><strong>Delisted</strong>: Available, slow sales, min order qty {'>'}  1</p>
                     </div>
                   </TooltipContent>
                 </Tooltip>
