@@ -1,3 +1,4 @@
+
 import { Product, ProductVariant } from './types';
 import { toast } from '@/components/ui/use-toast';
 import { processVariant } from './variantProcessor';
@@ -142,7 +143,7 @@ export const applyPreProductLogic = (
         toast({
           title: "PreProduct Logic Applied With Warnings",
           description: `Updated ${variantsUpdated - variantsWithErrors} variants successfully. ${variantsWithErrors} variants had errors.`,
-          variant: "warning"
+          variant: "destructive" // Changed from "warning" to "destructive" as it's a valid variant
         });
       } else {
         toast({
