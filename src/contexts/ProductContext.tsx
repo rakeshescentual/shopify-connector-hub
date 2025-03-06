@@ -14,7 +14,7 @@ export interface ProductVariant {
     auto_preproduct_preorder_backorder: 'yes' | 'no';
     auto_preproduct_preorder_notifyme: 'yes' | 'no';
     auto_preproduct_preorder_discontinued: 'yes' | 'no';
-    'custom.discontinued': '' | 'By Manufacturer' | 'Delisted' | 'No';
+    'custom.discontinued': 'No' | 'By Manufacturer' | 'Delisted' | '';
     'custom.ordering_min_qty': number;
     auto_preproduct_disablebutton: 'yes' | 'no';
   };
