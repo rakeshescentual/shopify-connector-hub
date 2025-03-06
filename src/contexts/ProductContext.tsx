@@ -1,7 +1,6 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
-type DiscontinuedValue = 'No' | 'By Manufacturer' | 'Delisted' | '';
+type DiscontinuedValue = 'No' | 'By Manufacturer' | 'By Us' | 'Special Order' | 'Delisted' | '';
 
 export interface ProductVariant {
   id: string;
@@ -81,7 +80,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           auto_preproduct_preorder_discontinued: 'no',
           auto_preproduct_disablebutton: 'no',
           'custom.discontinued': 'No',
-          'custom.ordering_min_qty': 0
+          'custom.ordering_min_qty': 1
         },
         backorderWeeks: 0
       }
@@ -118,7 +117,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         auto_preproduct_preorder_discontinued: 'no',
         auto_preproduct_disablebutton: 'no',
         'custom.discontinued': 'No',
-        'custom.ordering_min_qty': 0
+        'custom.ordering_min_qty': 1
       },
       backorderWeeks: 0
     };
@@ -144,6 +143,25 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     
     setTimeout(() => {
       const updatedProduct = {...product};
+      
+      // Ensure all variants have correct default values for metafields
+      updatedProduct.variants = updatedProduct.variants.map(variant => {
+        const updatedVariant = {...variant};
+        const metafields = {...updatedVariant.metafields};
+        
+        // Validate and set defaults for custom.discontinued
+        if (!metafields['custom.discontinued']) {
+          metafields['custom.discontinued'] = 'No';
+        }
+        
+        // Validate and set defaults for custom.ordering_min_qty
+        if (metafields['custom.ordering_min_qty'] === undefined || metafields['custom.ordering_min_qty'] === null) {
+          metafields['custom.ordering_min_qty'] = 1;
+        }
+        
+        updatedVariant.metafields = metafields;
+        return updatedVariant;
+      });
       
       // Step 1: Reset all preproduct metafields
       updatedProduct.variants = updatedProduct.variants.map(variant => {
@@ -276,6 +294,17 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   const updateVariant = () => {
     if (!editableVariant) return;
     
+    // Validate discontinuted metafield value
+    if (!editableVariant.metafields['custom.discontinued']) {
+      editableVariant.metafields['custom.discontinued'] = 'No';
+    }
+    
+    // Validate ordering min qty metafield value
+    if (editableVariant.metafields['custom.ordering_min_qty'] === undefined || 
+        editableVariant.metafields['custom.ordering_min_qty'] === null) {
+      editableVariant.metafields['custom.ordering_min_qty'] = 1;
+    }
+    
     // Validate only one preproduct metafield is set to "yes" for this variant
     const preproductMetafields = Object.entries(editableVariant.metafields)
       .filter(([key, value]) => 
@@ -347,7 +376,9 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           const updatedMetafields = { ...prev.metafields };
           
           if (metafieldKey === 'custom.ordering_min_qty') {
-            updatedMetafields['custom.ordering_min_qty'] = typeof value === 'number' ? value : parseInt(value) || 0;
+            // Ensure value is at least 1
+            const parsedValue = typeof value === 'number' ? value : parseInt(value) || 1;
+            updatedMetafields['custom.ordering_min_qty'] = Math.max(1, parsedValue);
           } else {
             // Use type casting to handle the string conversion properly
             (updatedMetafields as any)[metafieldKey] = String(value);

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
@@ -90,8 +89,14 @@ const VariantFormTabs = () => {
                   <TooltipTrigger asChild>
                     <Info size={14} className="text-muted-foreground cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent side="right">
-                    Set the discontinued status for this variant
+                  <TooltipContent side="right" className="max-w-xs">
+                    <div className="space-y-1">
+                      <p><strong>No</strong>: Available from supplier, we are happy to hold stock</p>
+                      <p><strong>By Manufacturer</strong>: Not Available from supplier</p>
+                      <p><strong>By Us</strong>: Available but marked down</p>
+                      <p><strong>Special Order</strong>: Available, slow sales, min order qty = 1</p>
+                      <p><strong>Delisted</strong>: Available, slow sales, min order qty > 1</p>
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -105,6 +110,8 @@ const VariantFormTabs = () => {
                 <SelectContent>
                   <SelectItem value="No">No</SelectItem>
                   <SelectItem value="By Manufacturer">By Manufacturer</SelectItem>
+                  <SelectItem value="By Us">By Us</SelectItem>
+                  <SelectItem value="Special Order">Special Order</SelectItem>
                   <SelectItem value="Delisted">Delisted</SelectItem>
                 </SelectContent>
               </Select>
@@ -197,7 +204,7 @@ const VariantFormTabs = () => {
                     </TooltipTrigger>
                     <TooltipContent side="right" className="max-w-xs">
                       <div className="space-y-2">
-                        <p>Minimum purchase quantity required</p>
+                        <p>Minimum purchase quantity required (minimum value: 1)</p>
                         {isSpecialOrderEligible && (
                           <p className="text-amber-600 font-medium">
                             Setting this to 1 enables special order status for out-of-stock items
@@ -210,6 +217,7 @@ const VariantFormTabs = () => {
                 <Input 
                   id="variant-min-qty"
                   type="number" 
+                  min="1"
                   value={editableVariant.metafields['custom.ordering_min_qty']} 
                   onChange={(e) => handleMetafieldChange('custom.ordering_min_qty', parseInt(e.target.value))} 
                   className={`transition-all focus:ring-1 ${isSpecialOrderEligible ? 'border-amber-300 bg-amber-50' : 'bg-white/70'}`}
