@@ -1,5 +1,6 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
+
+type DiscontinuedValue = 'No' | 'By Manufacturer' | 'Delisted' | '';
 
 export interface ProductVariant {
   id: string;
@@ -14,7 +15,7 @@ export interface ProductVariant {
     auto_preproduct_preorder_backorder: 'yes' | 'no';
     auto_preproduct_preorder_notifyme: 'yes' | 'no';
     auto_preproduct_preorder_discontinued: 'yes' | 'no';
-    'custom.discontinued': 'No' | 'By Manufacturer' | 'Delisted' | '';
+    'custom.discontinued': DiscontinuedValue;
     'custom.ordering_min_qty': number;
     auto_preproduct_disablebutton: 'yes' | 'no';
   };
@@ -133,6 +134,10 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
+  const isDiscontinued = (discontinuedValue: DiscontinuedValue): boolean => {
+    return discontinuedValue === 'By Manufacturer' || discontinuedValue === 'Delisted';
+  };
+
   const applyPreProductLogic = () => {
     setIsProcessing(true);
     
@@ -159,6 +164,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
       updatedProduct.variants = updatedProduct.variants.map(variant => {
         const updatedVariant = {...variant};
         const metafields = {...updatedVariant.metafields};
+        const discontinuedValue = metafields['custom.discontinued'];
         
         // Define priority order for preproduct metafields
         // 1. Discontinued (highest priority)
@@ -169,7 +175,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         // 6. Pre-order (lowest priority)
         
         // Check for discontinued items first (highest priority)
-        if (metafields['custom.discontinued'] === 'By Manufacturer' || metafields['custom.discontinued'] === 'Delisted') {
+        if (isDiscontinued(discontinuedValue)) {
           metafields.auto_preproduct_preorder_discontinued = 'yes';
           metafields.auto_preproduct_disablebutton = 'yes';
           updatedVariant.metafields = metafields;
@@ -194,8 +200,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         // Check for special order conditions (third priority)
         if (
           updatedVariant.inventory <= 0 && 
-          metafields['custom.discontinued'] !== 'By Manufacturer' && 
-          metafields['custom.discontinued'] !== 'Delisted' &&
+          !isDiscontinued(discontinuedValue) &&
           metafields['custom.ordering_min_qty'] === 1
         ) {
           metafields.auto_preproduct_preorder_specialorder = 'yes';
@@ -207,8 +212,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         // If the variant has been in backorder for 4 or more weeks
         if (
           updatedVariant.inventory <= 0 && 
-          metafields['custom.discontinued'] !== 'By Manufacturer' && 
-          metafields['custom.discontinued'] !== 'Delisted' &&
+          !isDiscontinued(discontinuedValue) &&
           updatedVariant.backorderWeeks >= 4
         ) {
           metafields.auto_preproduct_preorder_notifyme = 'yes';
@@ -219,8 +223,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         // Check for backorder conditions (fifth priority)
         if (
           updatedVariant.inventory <= 0 && 
-          metafields['custom.discontinued'] !== 'By Manufacturer' && 
-          metafields['custom.discontinued'] !== 'Delisted'
+          !isDiscontinued(discontinuedValue)
         ) {
           metafields.auto_preproduct_preorder_backorder = 'yes';
           updatedVariant.metafields = metafields;
