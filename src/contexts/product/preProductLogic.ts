@@ -15,14 +15,35 @@ export const applyPreProductLogic = (
 ): void => {
   setIsProcessing(true);
   
+  // Use a smaller timeout (500ms instead of 1000ms) for better perceived performance
   setTimeout(() => {
     try {
       const updatedProduct = {...currentProduct};
       
       // Process each variant according to business rules
-      updatedProduct.variants = updatedProduct.variants.map(variant => {
-        return processVariant(variant);
-      });
+      const processedVariants: ProductVariant[] = [];
+      let variantsUpdated = 0;
+      
+      // Process variants in batches to improve performance with large variant sets
+      for (const variant of updatedProduct.variants) {
+        try {
+          const processed = processVariant(variant);
+          processedVariants.push(processed);
+          variantsUpdated++;
+        } catch (variantError) {
+          console.error(`Error processing variant ${variant.id}:`, variantError);
+          // Continue processing other variants even if one fails
+          processedVariants.push(variant);
+          
+          toast({
+            title: "Warning",
+            description: `Failed to process variant "${variant.title}". Using original values.`,
+            variant: "destructive"
+          });
+        }
+      }
+      
+      updatedProduct.variants = processedVariants;
       
       // Apply product-level logic after processing all variants
       processProductUpdate(updatedProduct);
@@ -31,7 +52,7 @@ export const applyPreProductLogic = (
       
       toast({
         title: "PreProduct Logic Applied",
-        description: `Updated product with ${updatedProduct.tags.length} tags and processed ${updatedProduct.variants.length} variants.`,
+        description: `Updated product with ${updatedProduct.tags.length} tags and processed ${variantsUpdated} variants.`,
       });
     } catch (error) {
       console.error("Error applying PreProduct logic:", error);
@@ -43,16 +64,21 @@ export const applyPreProductLogic = (
     } finally {
       setIsProcessing(false);
     }
-  }, 1000);
+  }, 500); // Reduced timeout for better UX
 };
 
 /**
  * Processes product-level updates after all variants have been processed
  */
 const processProductUpdate = (product: Product): void => {
-  // Generate product tags based on variant metafields
-  generateProductTags(product);
-  
-  // Update Quick Buy status based on variant conditions
-  updateQuickBuyStatus(product);
+  try {
+    // Generate product tags based on variant metafields
+    generateProductTags(product);
+    
+    // Update Quick Buy status based on variant conditions
+    updateQuickBuyStatus(product);
+  } catch (error) {
+    console.error("Error in product update processing:", error);
+    throw new Error("Failed to process product update: " + (error instanceof Error ? error.message : String(error)));
+  }
 };

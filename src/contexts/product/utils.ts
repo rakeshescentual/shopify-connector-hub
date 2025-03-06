@@ -13,8 +13,10 @@ export const isDiscontinued = (discontinuedValue: DiscontinuedValue): boolean =>
  * Creates a new variant with default values
  */
 export const createNewVariant = (variantCount: number): ProductVariant => {
+  const uniqueId = `variant${variantCount + 1}_${Date.now().toString(36)}`;
+  
   return {
-    id: `variant${variantCount + 1}`,
+    id: uniqueId,
     title: `New Variant ${variantCount + 1}`,
     inventory: 10,
     hadStockBefore: false,
@@ -38,6 +40,25 @@ export const createNewVariant = (variantCount: number): ProductVariant => {
  * Validates a variant to ensure business rules are followed
  */
 export const validateVariant = (variant: ProductVariant): boolean => {
+  if (!variant) {
+    toast({
+      title: "Validation Error",
+      description: "Cannot validate null or undefined variant",
+      variant: "destructive"
+    });
+    return false;
+  }
+  
+  // Validate variant has required fields
+  if (!variant.id || !variant.title) {
+    toast({
+      title: "Validation Error",
+      description: "Variant must have an ID and title",
+      variant: "destructive"
+    });
+    return false;
+  }
+  
   // Validate only one preproduct metafield is set to "yes" for this variant
   const preproductMetafields = Object.entries(variant.metafields)
     .filter(([key, value]) => 
@@ -50,6 +71,16 @@ export const validateVariant = (variant: ProductVariant): boolean => {
     toast({
       title: "Validation Error",
       description: "Only one preproduct metafield can be set to 'yes' per variant at a time. Please fix and try again.",
+      variant: "destructive"
+    });
+    return false;
+  }
+  
+  // Validate ordering_min_qty is at least 1
+  if (variant.metafields['custom.ordering_min_qty'] < 1) {
+    toast({
+      title: "Validation Error", 
+      description: "Minimum order quantity must be at least 1",
       variant: "destructive"
     });
     return false;
@@ -70,4 +101,24 @@ export const getMetafieldTags = (): string[] => {
     'auto_preproduct_preorder_notifyme',
     'auto_preproduct_preorder_discontinued'
   ];
+};
+
+/**
+ * Validates a date string and returns true if it's valid and in the future
+ */
+export const isValidFutureDate = (dateString: string | null): boolean => {
+  if (!dateString) return false;
+  
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) return false;
+    
+    // Check if date is in the future
+    return date > now;
+  } catch (error) {
+    return false;
+  }
 };

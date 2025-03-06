@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Product, ProductVariant, ProductContextType } from './product/types';
 import { initialProduct } from './product/initialState';
@@ -24,11 +24,17 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [editableVariant, setEditableVariant] = useState<ProductVariant | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const selectedVariant = product.variants.find(v => v.id === selectedVariantId) || product.variants[0];
+  // Memoize selectedVariant to prevent unnecessary re-renders
+  const selectedVariant = useMemo(() => 
+    product.variants.find(v => v.id === selectedVariantId) || product.variants[0],
+    [product.variants, selectedVariantId]
+  );
 
   // Initialize editable variant when selected variant changes
   React.useEffect(() => {
-    setEditableVariant({...selectedVariant});
+    if (selectedVariant) {
+      setEditableVariant({...selectedVariant});
+    }
   }, [selectedVariantId, selectedVariant]);
 
   const addVariant = useCallback(() => {
@@ -56,7 +62,14 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [product.variants.length]);
 
   const updateVariant = useCallback(() => {
-    if (!editableVariant) return;
+    if (!editableVariant) {
+      toast({
+        title: "Error",
+        description: "No variant selected for update.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     try {
       // Validate discontinuted metafield value
@@ -66,11 +79,25 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
       
       // Validate ordering min qty metafield value
       if (editableVariant.metafields['custom.ordering_min_qty'] === undefined || 
-          editableVariant.metafields['custom.ordering_min_qty'] === null) {
+          editableVariant.metafields['custom.ordering_min_qty'] === null ||
+          editableVariant.metafields['custom.ordering_min_qty'] < 1) {
         editableVariant.metafields['custom.ordering_min_qty'] = 1;
       }
       
+      // Validate variant before updating
       if (!validateVariant(editableVariant)) {
+        return;
+      }
+      
+      // Check if the variant actually changed
+      const originalVariant = product.variants.find(v => v.id === editableVariant.id);
+      const hasChanged = JSON.stringify(originalVariant) !== JSON.stringify(editableVariant);
+      
+      if (!hasChanged) {
+        toast({
+          title: "No Changes",
+          description: "No changes were made to the variant.",
+        });
         return;
       }
       
@@ -86,7 +113,10 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         description: `Updated variant: ${editableVariant.title}`,
       });
       
-      applyPreProductLogicHandler();
+      // Automatically apply PreProduct logic after updating a variant
+      setTimeout(() => {
+        applyPreProductLogicHandler();
+      }, 100);
     } catch (error) {
       console.error("Error updating variant:", error);
       toast({
@@ -95,7 +125,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         variant: "destructive"
       });
     }
-  }, [editableVariant]);
+  }, [editableVariant, product.variants]);
 
   const applyPreProductLogicHandler = useCallback(() => {
     applyPreProductLogic(product, setProduct, setIsProcessing);
@@ -105,7 +135,24 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     handleVariantChangeImpl(field, value, editableVariant, setEditableVariant);
   }, [editableVariant]);
 
-  const value = {
+  const resetSimulator = useCallback(() => {
+    // Ask for confirmation before resetting
+    if (window.confirm("Are you sure you want to reset the simulator? All changes will be lost.")) {
+      setProduct(initialProduct);
+      setSelectedVariantId(initialProduct.variants[0].id);
+      setIsProcessing(false);
+      setEditableVariant({...initialProduct.variants[0]});
+      setShowAdvanced(false);
+      
+      toast({
+        title: "Simulator Reset",
+        description: "All changes have been discarded.",
+      });
+    }
+  }, []);
+
+  // Memoize context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({
     product,
     setProduct,
     selectedVariantId,
@@ -120,8 +167,21 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     addVariant,
     applyPreProductLogic: applyPreProductLogicHandler,
     updateVariant,
-    handleVariantChange
-  };
+    handleVariantChange,
+    resetSimulator
+  }), [
+    product, 
+    selectedVariantId, 
+    selectedVariant, 
+    isProcessing, 
+    editableVariant, 
+    showAdvanced, 
+    addVariant, 
+    applyPreProductLogicHandler, 
+    updateVariant, 
+    handleVariantChange,
+    resetSimulator
+  ]);
 
   return (
     <ProductContext.Provider value={value}>

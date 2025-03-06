@@ -3,7 +3,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Package, Plus, RefreshCw } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Package, Plus, RefreshCw, RotateCcw } from 'lucide-react';
 import VariantFormTabs from './VariantFormTabs';
 import { useProductContext } from '@/contexts/ProductContext';
 
@@ -13,7 +14,8 @@ const ProductForm = () => {
     selectedVariantId, 
     setSelectedVariantId, 
     addVariant, 
-    updateVariant 
+    updateVariant,
+    resetSimulator
   } = useProductContext();
 
   return (
@@ -57,13 +59,31 @@ const ProductForm = () => {
         </div>
       </CardContent>
       <CardFooter className="flex justify-between pt-6">
-        <Button 
-          variant="outline"
-          className="bg-background/80 backdrop-blur-sm border-destructive/20 hover:bg-destructive/10 text-destructive hover:text-destructive"
-          onClick={() => window.location.reload()}
-        >
-          Reset
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button 
+              variant="outline"
+              className="bg-background/80 backdrop-blur-sm border-destructive/20 hover:bg-destructive/10 text-destructive hover:text-destructive"
+            >
+              <RotateCcw className="h-4 w-4 mr-2" /> Reset
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Reset Simulator</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will reset all changes made to the product and variants. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={resetSimulator} className="bg-destructive text-destructive-foreground">
+                Reset
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        
         <Button 
           className="bg-primary/90 hover:bg-primary"
           onClick={updateVariant}

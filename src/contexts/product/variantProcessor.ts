@@ -6,27 +6,53 @@ import { isDiscontinued } from './utils';
  * Processes a variant update according to the defined business logic
  */
 export const processVariant = (variant: ProductVariant): ProductVariant => {
-  const updatedVariant = {...variant};
-  const metafields = {...updatedVariant.metafields};
+  if (!variant) {
+    throw new Error("Cannot process null or undefined variant");
+  }
   
-  // Step 1: Handle discontinued and inventory conditions first (highest priority)
-  if (isDiscontinued(metafields['custom.discontinued']) && updatedVariant.inventory <= 0) {
-    // Reset all preproduct metafields to "no" first
+  try {
+    const updatedVariant = {...variant};
+    const metafields = {...updatedVariant.metafields};
+    
+    // Ensure all required metafields exist with default values
+    ensureRequiredMetafields(metafields);
+    
+    // Step 1: Handle discontinued and inventory conditions first (highest priority)
+    if (isDiscontinued(metafields['custom.discontinued']) && updatedVariant.inventory <= 0) {
+      // Reset all preproduct metafields to "no" first
+      resetVariantPreProductMetafields(metafields);
+      
+      // Set discontinued metafield to "yes" if it's "By Manufacturer" or "Delisted"
+      metafields.auto_preproduct_preorder_discontinued = 'yes';
+      
+      // Set the disable button to "yes" for both delisted and by manufacturer cases
+      metafields.auto_preproduct_disablebutton = 'yes';
+      
+      updatedVariant.metafields = metafields;
+      return updatedVariant;
+    }
+    
+    // Step 2: For non-discontinued variants, reset and apply standard logic
+    metafields.auto_preproduct_disablebutton = 'no';
+    
+    // Reset all preproduct metafields before applying logic
     resetVariantPreProductMetafields(metafields);
     
-    // Set discontinued metafield to "yes" if it's "By Manufacturer" or "Delisted"
-    metafields.auto_preproduct_preorder_discontinued = 'yes';
-    
-    // Set the disable button to "yes" for both delisted and by manufacturer cases
-    metafields.auto_preproduct_disablebutton = 'yes';
+    // Step 3: Apply metafield conditions based on priority
+    applyPrioritizedMetafieldLogic(updatedVariant, metafields);
     
     updatedVariant.metafields = metafields;
     return updatedVariant;
+  } catch (error) {
+    console.error(`Error processing variant ${variant.id || 'unknown'}:`, error);
+    throw error; // Re-throw to allow upstream handling
   }
-  
-  // Step 2: For non-discontinued variants, reset and apply standard logic
-  metafields.auto_preproduct_disablebutton = 'no';
-  
+};
+
+/**
+ * Ensures all required metafields have valid default values
+ */
+const ensureRequiredMetafields = (metafields: ProductVariant['metafields']): void => {
   // Ensure default values for required metafields
   if (!metafields['custom.discontinued']) {
     metafields['custom.discontinued'] = 'No';
@@ -37,14 +63,22 @@ export const processVariant = (variant: ProductVariant): ProductVariant => {
     metafields['custom.ordering_min_qty'] = 1;
   }
   
-  // Reset all preproduct metafields before applying logic
-  resetVariantPreProductMetafields(metafields);
+  // Ensure all preproduct metafields exist
+  const preproductFields = [
+    'auto_preproduct_preorder',
+    'auto_preproduct_preorder_launch',
+    'auto_preproduct_preorder_specialorder',
+    'auto_preproduct_preorder_backorder',
+    'auto_preproduct_preorder_notifyme',
+    'auto_preproduct_preorder_discontinued',
+    'auto_preproduct_disablebutton'
+  ];
   
-  // Step 3: Apply metafield conditions based on priority
-  applyPrioritizedMetafieldLogic(updatedVariant, metafields);
-  
-  updatedVariant.metafields = metafields;
-  return updatedVariant;
+  preproductFields.forEach(field => {
+    if (metafields[field as keyof typeof metafields] === undefined) {
+      (metafields as any)[field] = 'no';
+    }
+  });
 };
 
 /**
@@ -63,23 +97,25 @@ export const resetVariantPreProductMetafields = (metafields: ProductVariant['met
  * Applies metafield logic based on priority
  */
 export const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: ProductVariant['metafields']): void => {
-  // Create a local copy of the discontinued value with the correct type
-  const discontinuedValue = metafields['custom.discontinued'] as DiscontinuedValue;
-  
   // Priority 1: Check for discontinued by manufacturer or delisted
-  if (isDiscontinued(discontinuedValue)) {
+  if (isDiscontinued(metafields['custom.discontinued'])) {
     metafields.auto_preproduct_preorder_discontinued = 'yes';
     return; // Exit early as we've set the highest priority metafield
   }
   
   // Priority 2: Check for launch dates (future products)
   if (variant.launchDate) {
-    const launchDate = new Date(variant.launchDate);
-    const currentDate = new Date();
-    
-    if (launchDate > currentDate) {
-      metafields.auto_preproduct_preorder_launch = 'yes';
-      return; // Exit early as we've set the highest priority metafield
+    try {
+      const launchDate = new Date(variant.launchDate);
+      const currentDate = new Date();
+      
+      if (launchDate > currentDate) {
+        metafields.auto_preproduct_preorder_launch = 'yes';
+        return; // Exit early as we've set the highest priority metafield
+      }
+    } catch (error) {
+      console.warn(`Invalid launch date format for variant ${variant.id}: ${variant.launchDate}`);
+      // Continue with other checks if launch date parsing fails
     }
   }
   
@@ -101,8 +137,8 @@ export const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafiel
   }
   
   // Priority 5: Check for backorder conditions
-  // Use the isDiscontinued helper function for checking discontinuation
-  if (variant.inventory <= 0 && !isDiscontinued(discontinuedValue)) {
+  // Use the isDiscontinued helper function for all discontinued checks to handle type issues
+  if (variant.inventory <= 0 && !isDiscontinued(metafields['custom.discontinued'])) {
     metafields.auto_preproduct_preorder_backorder = 'yes';
     return;
   }
