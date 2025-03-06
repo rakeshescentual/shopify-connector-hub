@@ -11,7 +11,6 @@ import { toast } from '@/components/ui/use-toast';
 import { AlertTriangle, Info, Tag, ShoppingCart, RefreshCw } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Types for product and variant
 interface ProductVariant {
   id: string;
   title: string;
@@ -40,11 +39,9 @@ interface Product {
   auto_quickbuydisable: 'yes' | 'no';
 }
 
-// Create a type that represents all possible metafield keys
 type MetafieldKey = keyof ProductVariant['metafields'];
 
 const ProductSimulator = () => {
-  // Sample initial product
   const initialProduct: Product = {
     id: 'product1',
     title: 'Sample Fragrance',
@@ -79,15 +76,12 @@ const ProductSimulator = () => {
   const [editableVariant, setEditableVariant] = useState<ProductVariant | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // Get selected variant
   const selectedVariant = product.variants.find(v => v.id === selectedVariantId) || product.variants[0];
 
   useEffect(() => {
-    // When a variant is selected, create an editable copy
     setEditableVariant({...selectedVariant});
   }, [selectedVariantId]);
 
-  // Function to add a new variant
   const addVariant = () => {
     const newVariant: ProductVariant = {
       id: `variant${product.variants.length + 1}`,
@@ -121,29 +115,22 @@ const ProductSimulator = () => {
     });
   };
 
-  // Apply the PreProduct logic to the current product
   const applyPreProductLogic = () => {
     setIsProcessing(true);
     
-    // Simulate processing delay
     setTimeout(() => {
       const updatedProduct = {...product};
       
-      // Process each variant
       updatedProduct.variants = updatedProduct.variants.map(variant => {
         const updatedVariant = {...variant};
         const metafields = {...updatedVariant.metafields};
         
-        // Reset all auto_preproduct metafields first
         Object.keys(metafields).forEach(key => {
           if (key.startsWith('auto_preproduct_preorder') && key !== 'auto_preproduct_disablebutton') {
             (metafields as any)[key] = 'no';
           }
         });
         
-        // Apply logic in priority order
-        
-        // 1. Discontinued logic
         if (metafields['custom.discontinued'] === 'By Manufacturer' || metafields['custom.discontinued'] === 'Delisted') {
           metafields.auto_preproduct_preorder_discontinued = 'yes';
           metafields.auto_preproduct_disablebutton = 'yes';
@@ -151,13 +138,11 @@ const ProductSimulator = () => {
           metafields.auto_preproduct_disablebutton = 'no';
         }
         
-        // 2. Check for launch date
         if (updatedVariant.launchDate && new Date(updatedVariant.launchDate) > new Date()) {
           metafields.auto_preproduct_preorder_launch = 'yes';
         }
         
-        // 3. Special order logic
-        else if (
+        if (
           updatedVariant.inventory <= 0 && 
           metafields['custom.discontinued'] !== 'By Manufacturer' && 
           metafields['custom.ordering_min_qty'] === 1 &&
@@ -167,8 +152,7 @@ const ProductSimulator = () => {
           metafields.auto_preproduct_preorder_specialorder = 'yes';
         }
         
-        // 4. Backorder logic
-        else if (
+        if (
           updatedVariant.inventory <= 0 && 
           metafields['custom.discontinued'] !== 'By Manufacturer' && 
           metafields['custom.discontinued'] !== 'Delisted' &&
@@ -179,7 +163,6 @@ const ProductSimulator = () => {
           metafields.auto_preproduct_preorder_backorder = 'yes';
         }
         
-        // 5. Notify Me logic (after 4 weeks in backorder)
         if (
           updatedVariant.backorderWeeks >= 4 && 
           metafields.auto_preproduct_preorder_backorder === 'yes'
@@ -188,7 +171,6 @@ const ProductSimulator = () => {
           metafields.auto_preproduct_preorder_notifyme = 'yes';
         }
         
-        // 6. Preorder logic (lowest priority)
         if (
           updatedVariant.inventory <= 0 && 
           !updatedVariant.hadStockBefore &&
@@ -203,20 +185,16 @@ const ProductSimulator = () => {
         return updatedVariant;
       });
       
-      // Update product tags based on variant metafields
       const newTags: string[] = [];
       
-      // Check which metafields are set to 'yes' across all variants
       ['auto_preproduct_preorder', 
        'auto_preproduct_preorder_launch', 
        'auto_preproduct_preorder_specialorder', 
        'auto_preproduct_preorder_backorder', 
        'auto_preproduct_preorder_notifyme', 
        'auto_preproduct_preorder_discontinued'].forEach(metafieldKey => {
-        // Remove the auto_ prefix for the tag
         const tagName = metafieldKey.replace('auto_', '');
         
-        // If any variant has this metafield set to 'yes', add the corresponding tag
         if (updatedProduct.variants.some(variant => 
           variant.metafields[metafieldKey as keyof typeof variant.metafields] === 'yes'
         )) {
@@ -224,7 +202,6 @@ const ProductSimulator = () => {
         }
       });
       
-      // Set auto_quickbuydisable
       const hasMultipleVariants = updatedProduct.variants.length > 1;
       const hasOutOfStockVariant = updatedProduct.variants.some(v => v.inventory <= 0);
       const hasPreProductTag = newTags.length > 0;
@@ -245,7 +222,6 @@ const ProductSimulator = () => {
     }, 1000);
   };
 
-  // Update a variant
   const updateVariant = () => {
     if (!editableVariant) return;
     
@@ -261,11 +237,9 @@ const ProductSimulator = () => {
       description: `Updated variant: ${editableVariant.title}`,
     });
     
-    // Apply logic
     applyPreProductLogic();
   };
 
-  // Handle variant field changes
   const handleVariantChange = (field: string, value: any) => {
     if (!editableVariant) return;
     
@@ -284,13 +258,13 @@ const ProductSimulator = () => {
           };
         }
         
-        // For all other metafields, ensure we're dealing with strings
+        const stringValue = typeof value === 'string' ? value : String(value);
         return {
           ...prev,
           metafields: {
             ...prev.metafields,
-            [metafieldKey]: String(value)
-          }
+            [metafieldKey]: stringValue
+          } as ProductVariant['metafields']
         };
       });
     } else {
@@ -314,7 +288,6 @@ const ProductSimulator = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {/* Product Variant Editor */}
           <Card className="glass-card border-none animate-slide-up">
             <CardHeader>
               <CardTitle>Edit Product Variant</CardTitle>
@@ -480,7 +453,6 @@ const ProductSimulator = () => {
             </CardFooter>
           </Card>
 
-          {/* Product Preview */}
           <Card className="glass-card border-none animate-slide-up">
             <CardHeader>
               <CardTitle>Product Preview</CardTitle>
@@ -538,7 +510,6 @@ const ProductSimulator = () => {
                                            variant.metafields['custom.discontinued'] === 'Delisted';
                     const disableButton = variant.metafields.auto_preproduct_disablebutton === 'yes';
                     
-                    // Find active tag
                     const activeMetafield = Object.entries(variant.metafields)
                       .find(([key, value]) => key.startsWith('auto_preproduct_preorder') && 
                                               key !== 'auto_preproduct_disablebutton' && 
