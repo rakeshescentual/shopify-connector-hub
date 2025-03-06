@@ -111,6 +111,38 @@ const helpTips: HelpTip[] = [
     relatedLinks: [
       {text: 'Pre-order Settings', url: '#tags'}
     ]
+  },
+  {
+    id: 'high-min-qty',
+    condition: (context) => context.product.variants.some(v => 
+      v.metafields['custom.ordering_min_qty'] > 1
+    ),
+    title: 'High Minimum Order Quantity',
+    content: 'Some variants have a minimum order quantity greater than 1. This will affect which status tag is applied when inventory reaches zero.',
+    priority: 2,
+    relatedLinks: [
+      {text: 'Order Quantities', url: '#tips'}
+    ]
+  },
+  {
+    id: 'inconsistent-statuses',
+    condition: (context) => {
+      const statuses = new Set();
+      context.product.variants.forEach(v => {
+        Object.entries(v.metafields).forEach(([key, value]) => {
+          if (key.startsWith('auto_preproduct_preorder') && value === 'yes') {
+            statuses.add(key);
+          }
+        });
+      });
+      return statuses.size > 2; // More than 2 different statuses is potentially confusing
+    },
+    title: 'Inconsistent Variant Statuses',
+    content: 'Your product has many different status types across variants. Consider standardizing to fewer status types for a better customer experience.',
+    priority: 3,
+    relatedLinks: [
+      {text: 'Status Best Practices', url: '#tips'}
+    ]
   }
 ];
 
