@@ -41,8 +41,12 @@ const processVariantUpdate = (variant: ProductVariant): ProductVariant => {
     // Reset all preproduct metafields to "no" first
     resetVariantPreProductMetafields(metafields);
     
-    // Set only discontinued metafield to "yes"
-    metafields.auto_preproduct_preorder_discontinued = 'yes';
+    // Set discontinued metafield to "yes" if it's "By Manufacturer"
+    if (metafields['custom.discontinued'] === 'By Manufacturer') {
+      metafields.auto_preproduct_preorder_discontinued = 'yes';
+    }
+    
+    // Set the disable button to "yes" for both delisted and by manufacturer cases
     metafields.auto_preproduct_disablebutton = 'yes';
     
     updatedVariant.metafields = metafields;
@@ -90,7 +94,13 @@ const resetVariantPreProductMetafields = (metafields: ProductVariant['metafields
 const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: ProductVariant['metafields']): void => {
   const discontinuedValue = metafields['custom.discontinued'];
   
-  // Priority 1: Check for launch dates (future products)
+  // Priority 1: Check for discontinued by manufacturer
+  if (discontinuedValue === 'By Manufacturer') {
+    metafields.auto_preproduct_preorder_discontinued = 'yes';
+    return; // Exit early as we've set the highest priority metafield
+  }
+  
+  // Priority 2: Check for launch dates (future products)
   if (variant.launchDate) {
     const launchDate = new Date(variant.launchDate);
     const currentDate = new Date();
@@ -101,7 +111,7 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
     }
   }
   
-  // Priority 2: Check for notify me conditions (extended backorder)
+  // Priority 3: Check for notify me conditions (extended backorder)
   if (variant.inventory <= 0 && 
       !isDiscontinued(discontinuedValue) &&
       variant.backorderWeeks >= 4) {
@@ -109,24 +119,24 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
     return;
   }
   
-  // Priority 3: Check for special order conditions
+  // Priority 4: Check for special order conditions
   if (variant.inventory <= 0 && 
-      !isDiscontinued(discontinuedValue) &&
+      discontinuedValue !== 'By Manufacturer' &&
       metafields['custom.ordering_min_qty'] === 1) {
     metafields.auto_preproduct_preorder_specialorder = 'yes';
     return;
   }
   
-  // Priority 4: Check for backorder conditions
-  if (variant.inventory <= 0 && 
-      !isDiscontinued(discontinuedValue)) {
+  // Priority 5: Check for backorder conditions
+  if (discontinuedValue !== 'By Manufacturer' && 
+      discontinuedValue !== 'Delisted') {
     metafields.auto_preproduct_preorder_backorder = 'yes';
     return;
   }
   
-  // Priority 5 (lowest): Apply standard preorder status for new products
-  if (variant.inventory <= 0 && 
-      !variant.hadStockBefore) {
+  // Priority 6 (lowest): Apply standard preorder status when no other condition is met
+  // and the inventory is zero
+  if (variant.inventory <= 0) {
     metafields.auto_preproduct_preorder = 'yes';
     return;
   }
