@@ -1,5 +1,5 @@
 
-import { Product, ProductVariant } from './types';
+import { Product, ProductVariant, DiscontinuedValue } from './types';
 import { isDiscontinued, getMetafieldTags } from './utils';
 import { toast } from '@/components/ui/use-toast';
 
@@ -92,7 +92,7 @@ const resetVariantPreProductMetafields = (metafields: ProductVariant['metafields
  * Applies metafield logic based on priority
  */
 const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: ProductVariant['metafields']): void => {
-  const discontinuedValue = metafields['custom.discontinued'];
+  const discontinuedValue: DiscontinuedValue = metafields['custom.discontinued'];
   
   // Priority 1: Check for discontinued by manufacturer
   if (discontinuedValue === 'By Manufacturer') {
