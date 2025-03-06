@@ -168,7 +168,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           metafields.auto_preproduct_disablebutton = 'no';
         }
         
-        // Check for launch dates - UPDATED logic for preproduct_preorder_launch
+        // Check for launch dates
         if (updatedVariant.launchDate) {
           const launchDate = new Date(updatedVariant.launchDate);
           const currentDate = new Date();
@@ -186,6 +186,8 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
         
         // Check for special order conditions
+        // Items that are out of stock, not discontinued by manufacturer, 
+        // and have custom.ordering_min_qty set to exactly 1
         if (
           updatedVariant.inventory <= 0 && 
           metafields['custom.discontinued'] !== 'By Manufacturer' && 
@@ -194,6 +196,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           metafields.auto_preproduct_preorder_launch === 'no'
         ) {
           metafields.auto_preproduct_preorder_specialorder = 'yes';
+          console.log(`Special order set for variant: ${updatedVariant.title}`);
         }
         
         // Check for backorder conditions
@@ -218,14 +221,17 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
         
         // Apply preproduct_preorder according to refined logic
-        const hasNoOtherPreProductMetafields = 
+        // Only if the variant has never had stock before and
+        // no other preproduct metafields are set to "yes"
+        if (
+          updatedVariant.inventory <= 0 && 
+          !updatedVariant.hadStockBefore &&
           metafields.auto_preproduct_preorder_launch === 'no' &&
           metafields.auto_preproduct_preorder_specialorder === 'no' &&
           metafields.auto_preproduct_preorder_backorder === 'no' &&
           metafields.auto_preproduct_preorder_notifyme === 'no' &&
-          metafields.auto_preproduct_preorder_discontinued === 'no';
-        
-        if (updatedVariant.inventory <= 0 && hasNoOtherPreProductMetafields) {
+          metafields.auto_preproduct_preorder_discontinued === 'no'
+        ) {
           metafields.auto_preproduct_preorder = 'yes';
         }
         

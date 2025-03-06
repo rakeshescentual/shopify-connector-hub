@@ -133,15 +133,15 @@ const IntegrationRules = () => {
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">auto_preproduct_preorder_launch</TableCell>
-                          <TableCell>Variant has launchDate AND auto_preproduct_preorder_launch is "yes."</TableCell>
+                          <TableCell>Variant has a future launchDate set.</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">auto_preproduct_preorder_specialorder</TableCell>
-                          <TableCell>Inventory ≤ 0, custom.discontinued is not "By Manufacturer," custom.ordering_min_qty is 1.</TableCell>
+                          <TableCell>Inventory ≤ 0, custom.discontinued is not "By Manufacturer", custom.ordering_min_qty is exactly 1, and no other higher priority preproduct metafields are "yes".</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">auto_preproduct_preorder_backorder</TableCell>
-                          <TableCell>custom.discontinued is not "By Manufacturer" or "Delisted."</TableCell>
+                          <TableCell>custom.discontinued is not "By Manufacturer" or "Delisted" and no other higher priority preproduct metafields are "yes".</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">auto_preproduct_preorder_notifyme</TableCell>

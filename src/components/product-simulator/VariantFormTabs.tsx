@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Info, AlertCircle, Tag, Package, Calendar } from 'lucide-react';
+import { Info, AlertCircle, Tag, Package, Calendar, ShoppingBag } from 'lucide-react';
 import { useProductContext } from '@/contexts/ProductContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
@@ -23,10 +22,14 @@ const VariantFormTabs = () => {
     }
   };
 
-  // Calculate if the launch date is in the future
   const isLaunchDateInFuture = editableVariant.launchDate 
     ? new Date(editableVariant.launchDate) > new Date() 
     : false;
+
+  const isSpecialOrderEligible = 
+    editableVariant.inventory <= 0 && 
+    editableVariant.metafields['custom.discontinued'] !== 'By Manufacturer' &&
+    editableVariant.metafields['custom.ordering_min_qty'] === 1;
 
   return (
     <TooltipProvider>
@@ -167,13 +170,28 @@ const VariantFormTabs = () => {
               
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <Label htmlFor="variant-min-qty" className="text-sm font-medium">Minimum Order Quantity</Label>
+                  <Label 
+                    htmlFor="variant-min-qty" 
+                    className={`text-sm font-medium ${isSpecialOrderEligible ? 'text-amber-700' : ''}`}
+                  >
+                    Minimum Order Quantity
+                  </Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Info size={14} className="text-muted-foreground cursor-help" />
+                      <ShoppingBag 
+                        size={14} 
+                        className={isSpecialOrderEligible ? 'text-amber-500 cursor-help' : 'text-muted-foreground cursor-help'} 
+                      />
                     </TooltipTrigger>
-                    <TooltipContent side="right">
-                      Minimum purchase quantity required
+                    <TooltipContent side="right" className="max-w-xs">
+                      <div className="space-y-2">
+                        <p>Minimum purchase quantity required</p>
+                        {isSpecialOrderEligible && (
+                          <p className="text-amber-600 font-medium">
+                            Setting this to 1 enables special order status for out-of-stock items
+                          </p>
+                        )}
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -182,8 +200,14 @@ const VariantFormTabs = () => {
                   type="number" 
                   value={editableVariant.metafields['custom.ordering_min_qty']} 
                   onChange={(e) => handleMetafieldChange('custom.ordering_min_qty', parseInt(e.target.value))} 
-                  className="transition-all focus:ring-1 bg-white/70"
+                  className={`transition-all focus:ring-1 ${isSpecialOrderEligible ? 'border-amber-300 bg-amber-50' : 'bg-white/70'}`}
                 />
+                {isSpecialOrderEligible && (
+                  <div className="mt-1 text-xs text-amber-600 flex items-center gap-1">
+                    <ShoppingBag size={12} />
+                    <span>Meets special order criteria</span>
+                  </div>
+                )}
               </div>
             </div>
             
