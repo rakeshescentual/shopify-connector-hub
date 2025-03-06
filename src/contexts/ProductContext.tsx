@@ -74,30 +74,33 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
     
     try {
-      // Validate discontinuted metafield value
-      if (!editableVariant.metafields['custom.discontinued']) {
-        editableVariant.metafields['custom.discontinued'] = 'No';
+      // Deep copy to avoid mutations
+      const variantToUpdate = JSON.parse(JSON.stringify(editableVariant));
+      
+      // Validate discontinued metafield value
+      if (!variantToUpdate.metafields['custom.discontinued']) {
+        variantToUpdate.metafields['custom.discontinued'] = 'No';
       }
       
       // Validate ordering min qty metafield value
-      if (editableVariant.metafields['custom.ordering_min_qty'] === undefined || 
-          editableVariant.metafields['custom.ordering_min_qty'] === null ||
-          editableVariant.metafields['custom.ordering_min_qty'] < 1) {
-        editableVariant.metafields['custom.ordering_min_qty'] = 1;
+      if (variantToUpdate.metafields['custom.ordering_min_qty'] === undefined || 
+          variantToUpdate.metafields['custom.ordering_min_qty'] === null ||
+          variantToUpdate.metafields['custom.ordering_min_qty'] < 1) {
+        variantToUpdate.metafields['custom.ordering_min_qty'] = 1;
       }
       
       // Validate variant before updating
-      if (!validateVariant(editableVariant)) {
+      if (!validateVariant(variantToUpdate)) {
         return;
       }
       
       // Add lastUpdated timestamp and set status to pending
-      editableVariant.lastUpdated = new Date().toISOString();
-      editableVariant.status = 'pending';
+      variantToUpdate.lastUpdated = new Date().toISOString();
+      variantToUpdate.status = 'pending';
       
       // Check if the variant actually changed
-      const originalVariant = product.variants.find(v => v.id === editableVariant.id);
-      const hasChanged = JSON.stringify(originalVariant) !== JSON.stringify(editableVariant);
+      const originalVariant = product.variants.find(v => v.id === variantToUpdate.id);
+      const hasChanged = JSON.stringify(originalVariant) !== JSON.stringify(variantToUpdate);
       
       if (!hasChanged) {
         toast({
@@ -110,19 +113,22 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
       setProduct(prev => ({
         ...prev,
         variants: prev.variants.map(v => 
-          v.id === editableVariant.id ? editableVariant : v
+          v.id === variantToUpdate.id ? variantToUpdate : v
         )
       }));
       
       toast({
         title: "Variant Updated",
-        description: `Updated variant: ${editableVariant.title}`,
+        description: `Updated variant: ${variantToUpdate.title}`,
       });
       
-      // Automatically apply PreProduct logic after updating a variant
-      setTimeout(() => {
-        applyPreProductLogicHandler();
-      }, 100);
+      // Ask user if they want to automatically apply PreProduct logic
+      const shouldApplyLogic = window.confirm("Do you want to apply PreProduct logic to update product status?");
+      if (shouldApplyLogic) {
+        setTimeout(() => {
+          applyPreProductLogicHandler();
+        }, 100);
+      }
     } catch (error) {
       console.error("Error updating variant:", error);
       toast({
@@ -134,6 +140,22 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [editableVariant, product.variants]);
 
   const applyPreProductLogicHandler = useCallback(() => {
+    if (product.variants.length === 0) {
+      toast({
+        title: "Warning",
+        description: "Cannot apply PreProduct logic: No variants exist.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Check if any variants are pending
+    const hasPendingVariants = product.variants.some(v => v.status === 'pending');
+    if (hasPendingVariants) {
+      const proceed = window.confirm("Some variants are still pending. Processing may overwrite your recent changes. Continue?");
+      if (!proceed) return;
+    }
+    
     applyPreProductLogic(product, setProduct, setIsProcessing);
   }, [product]);
 
