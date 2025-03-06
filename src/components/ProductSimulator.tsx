@@ -248,23 +248,18 @@ const ProductSimulator = () => {
       setEditableVariant(prev => {
         if (!prev) return prev;
         
+        const updatedMetafields = { ...prev.metafields };
+
         if (metafieldKey === 'custom.ordering_min_qty') {
-          return {
-            ...prev,
-            metafields: {
-              ...prev.metafields,
-              [metafieldKey]: typeof value === 'number' ? value : parseInt(value) || 0
-            }
-          };
+          updatedMetafields[metafieldKey] = typeof value === 'number' ? value : parseInt(value) || 0;
+        } else {
+          const stringValue = String(value);
+          (updatedMetafields as any)[metafieldKey] = stringValue;
         }
         
-        const stringValue = typeof value === 'string' ? value : String(value);
         return {
           ...prev,
-          metafields: {
-            ...prev.metafields,
-            [metafieldKey]: stringValue
-          } as ProductVariant['metafields']
+          metafields: updatedMetafields
         };
       });
     } else {
