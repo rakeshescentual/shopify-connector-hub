@@ -13,7 +13,12 @@ const VariantStatusCard: React.FC<VariantStatusCardProps> = ({ variant }) => {
   const isOutOfStock = variant.inventory <= 0;
   const isDiscontinued = variant.metafields['custom.discontinued'] === 'By Manufacturer' || 
                          variant.metafields['custom.discontinued'] === 'Delisted';
-  const disableButton = variant.metafields.auto_preproduct_disablebutton === 'yes';
+  
+  // Disable button if:
+  // 1. auto_preproduct_disablebutton is set to "yes" OR
+  // 2. Discontinued (By Manufacturer or Delisted) AND out of stock
+  const disableButton = variant.metafields.auto_preproduct_disablebutton === 'yes' || 
+                       (isDiscontinued && isOutOfStock);
   
   // Get the active preproduct metafield (only one should be active at a time per variant)
   const activeMetafield = Object.entries(variant.metafields)

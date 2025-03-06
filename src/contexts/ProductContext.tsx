@@ -191,9 +191,9 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         // Check each condition independently for each variant
         
         // Check for discontinued items (highest priority)
-        if (isDiscontinued(discontinuedValue)) {
+        if (isDiscontinued(discontinuedValue) && updatedVariant.inventory <= 0) {
           metafields.auto_preproduct_preorder_discontinued = 'yes';
-          // Set auto_preproduct_disablebutton to "yes" for discontinued items
+          // Set auto_preproduct_disablebutton to "yes" for discontinued items with no inventory
           metafields.auto_preproduct_disablebutton = 'yes';
         }
         
@@ -274,9 +274,23 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
       // Step 4: Update Quick Buy status based on variant conditions
       const hasMultipleVariants = updatedProduct.variants.length > 1;
       const hasOutOfStockVariant = updatedProduct.variants.some(v => v.inventory <= 0);
-      const hasPreProductTag = newTags.length > 0;
       
-      updatedProduct.auto_quickbuydisable = (hasMultipleVariants && hasOutOfStockVariant && hasPreProductTag) 
+      // Check if any out-of-stock variant has any preproduct metafield set to "yes"
+      const hasOutOfStockVariantWithPreProduct = updatedProduct.variants.some(variant => 
+        variant.inventory <= 0 && 
+        Object.entries(variant.metafields)
+          .some(([key, value]) => 
+            key.startsWith('auto_preproduct_preorder') && 
+            key !== 'auto_preproduct_disablebutton' && 
+            value === 'yes'
+          )
+      );
+      
+      // Set auto_quickbuydisable to "yes" if:
+      // 1. The product has multiple variants AND
+      // 2. At least one variant is out of stock AND
+      // 3. That out-of-stock variant has a preproduct metafield set to "yes"
+      updatedProduct.auto_quickbuydisable = (hasMultipleVariants && hasOutOfStockVariantWithPreProduct) 
         ? 'yes' 
         : 'no';
       
