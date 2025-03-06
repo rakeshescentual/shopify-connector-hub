@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -135,7 +134,7 @@ const ProductSimulator = () => {
         // Reset all auto_preproduct metafields first
         Object.keys(metafields).forEach(key => {
           if (key.startsWith('auto_preproduct_preorder') && key !== 'auto_preproduct_disablebutton') {
-            metafields[key as keyof typeof metafields] = 'no';
+            (metafields as any)[key] = 'no';
           }
         });
         
@@ -269,17 +268,26 @@ const ProductSimulator = () => {
     
     if (field.startsWith('metafields.')) {
       const metafieldKey = field.split('.')[1];
-      setEditableVariant({
-        ...editableVariant,
-        metafields: {
-          ...editableVariant.metafields,
-          [metafieldKey]: value
+      setEditableVariant(prev => {
+        if (!prev) return prev;
+        
+        const updatedMetafields = { ...prev.metafields };
+        
+        if (metafieldKey === 'custom.ordering_min_qty') {
+          updatedMetafields[metafieldKey] = typeof value === 'number' ? value : parseInt(value) || 0;
+        } else {
+          (updatedMetafields as any)[metafieldKey] = value;
         }
+        
+        return {
+          ...prev,
+          metafields: updatedMetafields
+        };
       });
     } else {
-      setEditableVariant({
-        ...editableVariant,
-        [field]: value
+      setEditableVariant(prev => {
+        if (!prev) return prev;
+        return { ...prev, [field]: value };
       });
     }
   };
