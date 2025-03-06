@@ -1,3 +1,4 @@
+
 import { Product, ProductVariant, DiscontinuedValue } from './types';
 import { isDiscontinued, getMetafieldTags } from './utils';
 import { toast } from '@/components/ui/use-toast';
@@ -89,7 +90,8 @@ const resetVariantPreProductMetafields = (metafields: ProductVariant['metafields
  * Applies metafield logic based on priority
  */
 const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: ProductVariant['metafields']): void => {
-  // We need to explicitly cast to the correct type to avoid TypeScript inference issues
+  // Create a local copy of the discontinued value with the correct type
+  // Use type assertion to specify the exact type to TypeScript
   const discontinuedValue = metafields['custom.discontinued'] as DiscontinuedValue;
   
   // Priority 1: Check for discontinued by manufacturer or delisted
@@ -127,10 +129,9 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
   }
   
   // Priority 5: Check for backorder conditions
-  // Need to ensure discontinuedValue is properly typed for comparison
-  if (variant.inventory <= 0 && 
-      discontinuedValue !== 'By Manufacturer' && 
-      discontinuedValue !== 'Delisted') {
+  // To fix the TypeScript error, use a helper function isDiscontinued to check the values
+  // rather than direct comparison which is causing TypeScript to narrow the type incorrectly
+  if (variant.inventory <= 0 && !isDiscontinued(discontinuedValue)) {
     metafields.auto_preproduct_preorder_backorder = 'yes';
     return;
   }
