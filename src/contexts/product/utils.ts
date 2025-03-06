@@ -2,10 +2,16 @@
 import { ProductVariant, DiscontinuedValue } from './types';
 import { toast } from '@/components/ui/use-toast';
 
+/**
+ * Checks if a variant is discontinued based on the discontinued value
+ */
 export const isDiscontinued = (discontinuedValue: DiscontinuedValue): boolean => {
   return discontinuedValue === 'By Manufacturer' || discontinuedValue === 'Delisted';
 };
 
+/**
+ * Creates a new variant with default values
+ */
 export const createNewVariant = (variantCount: number): ProductVariant => {
   return {
     id: `variant${variantCount + 1}`,
@@ -28,6 +34,9 @@ export const createNewVariant = (variantCount: number): ProductVariant => {
   };
 };
 
+/**
+ * Validates a variant to ensure business rules are followed
+ */
 export const validateVariant = (variant: ProductVariant): boolean => {
   // Validate only one preproduct metafield is set to "yes" for this variant
   const preproductMetafields = Object.entries(variant.metafields)
@@ -49,6 +58,9 @@ export const validateVariant = (variant: ProductVariant): boolean => {
   return true;
 };
 
+/**
+ * Returns a list of metafield tags
+ */
 export const getMetafieldTags = (): string[] => {
   return [
     'auto_preproduct_preorder',

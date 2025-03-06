@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Product, ProductVariant, ProductContextType } from './product/types';
 import { initialProduct } from './product/initialState';
@@ -26,65 +26,84 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const selectedVariant = product.variants.find(v => v.id === selectedVariantId) || product.variants[0];
 
+  // Initialize editable variant when selected variant changes
   React.useEffect(() => {
     setEditableVariant({...selectedVariant});
-  }, [selectedVariantId]);
+  }, [selectedVariantId, selectedVariant]);
 
-  const addVariant = () => {
-    const newVariant = createNewVariant(product.variants.length);
-    
-    setProduct(prev => ({
-      ...prev,
-      variants: [...prev.variants, newVariant]
-    }));
-    
-    setSelectedVariantId(newVariant.id);
-    toast({
-      title: "Variant Added",
-      description: `Added new variant: ${newVariant.title}`,
-    });
-  };
+  const addVariant = useCallback(() => {
+    try {
+      const newVariant = createNewVariant(product.variants.length);
+      
+      setProduct(prev => ({
+        ...prev,
+        variants: [...prev.variants, newVariant]
+      }));
+      
+      setSelectedVariantId(newVariant.id);
+      toast({
+        title: "Variant Added",
+        description: `Added new variant: ${newVariant.title}`,
+      });
+    } catch (error) {
+      console.error("Error adding variant:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add variant. See console for details.",
+        variant: "destructive"
+      });
+    }
+  }, [product.variants.length]);
 
-  const updateVariant = () => {
+  const updateVariant = useCallback(() => {
     if (!editableVariant) return;
     
-    // Validate discontinuted metafield value
-    if (!editableVariant.metafields['custom.discontinued']) {
-      editableVariant.metafields['custom.discontinued'] = 'No';
+    try {
+      // Validate discontinuted metafield value
+      if (!editableVariant.metafields['custom.discontinued']) {
+        editableVariant.metafields['custom.discontinued'] = 'No';
+      }
+      
+      // Validate ordering min qty metafield value
+      if (editableVariant.metafields['custom.ordering_min_qty'] === undefined || 
+          editableVariant.metafields['custom.ordering_min_qty'] === null) {
+        editableVariant.metafields['custom.ordering_min_qty'] = 1;
+      }
+      
+      if (!validateVariant(editableVariant)) {
+        return;
+      }
+      
+      setProduct(prev => ({
+        ...prev,
+        variants: prev.variants.map(v => 
+          v.id === editableVariant.id ? editableVariant : v
+        )
+      }));
+      
+      toast({
+        title: "Variant Updated",
+        description: `Updated variant: ${editableVariant.title}`,
+      });
+      
+      applyPreProductLogicHandler();
+    } catch (error) {
+      console.error("Error updating variant:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update variant. See console for details.",
+        variant: "destructive"
+      });
     }
-    
-    // Validate ordering min qty metafield value
-    if (editableVariant.metafields['custom.ordering_min_qty'] === undefined || 
-        editableVariant.metafields['custom.ordering_min_qty'] === null) {
-      editableVariant.metafields['custom.ordering_min_qty'] = 1;
-    }
-    
-    if (!validateVariant(editableVariant)) {
-      return;
-    }
-    
-    setProduct(prev => ({
-      ...prev,
-      variants: prev.variants.map(v => 
-        v.id === editableVariant.id ? editableVariant : v
-      )
-    }));
-    
-    toast({
-      title: "Variant Updated",
-      description: `Updated variant: ${editableVariant.title}`,
-    });
-    
-    applyPreProductLogicHandler();
-  };
+  }, [editableVariant]);
 
-  const applyPreProductLogicHandler = () => {
+  const applyPreProductLogicHandler = useCallback(() => {
     applyPreProductLogic(product, setProduct, setIsProcessing);
-  };
+  }, [product]);
 
-  const handleVariantChange = (field: string, value: any) => {
+  const handleVariantChange = useCallback((field: string, value: any) => {
     handleVariantChangeImpl(field, value, editableVariant, setEditableVariant);
-  };
+  }, [editableVariant]);
 
   const value = {
     product,

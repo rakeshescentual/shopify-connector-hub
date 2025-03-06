@@ -10,9 +10,7 @@ export const processVariant = (variant: ProductVariant): ProductVariant => {
   const metafields = {...updatedVariant.metafields};
   
   // Step 1: Handle discontinued and inventory conditions first (highest priority)
-  if ((metafields['custom.discontinued'] === 'Delisted' || 
-       metafields['custom.discontinued'] === 'By Manufacturer') && 
-      updatedVariant.inventory <= 0) {
+  if (isDiscontinued(metafields['custom.discontinued']) && updatedVariant.inventory <= 0) {
     // Reset all preproduct metafields to "no" first
     resetVariantPreProductMetafields(metafields);
     
@@ -69,7 +67,7 @@ export const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafiel
   const discontinuedValue = metafields['custom.discontinued'] as DiscontinuedValue;
   
   // Priority 1: Check for discontinued by manufacturer or delisted
-  if (discontinuedValue === 'By Manufacturer' || discontinuedValue === 'Delisted') {
+  if (isDiscontinued(discontinuedValue)) {
     metafields.auto_preproduct_preorder_discontinued = 'yes';
     return; // Exit early as we've set the highest priority metafield
   }
@@ -103,7 +101,7 @@ export const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafiel
   }
   
   // Priority 5: Check for backorder conditions
-  // To fix the TypeScript error, use the isDiscontinued helper function for checking
+  // Use the isDiscontinued helper function for checking discontinuation
   if (variant.inventory <= 0 && !isDiscontinued(discontinuedValue)) {
     metafields.auto_preproduct_preorder_backorder = 'yes';
     return;
