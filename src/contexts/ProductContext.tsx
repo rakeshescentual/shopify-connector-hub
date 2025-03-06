@@ -160,79 +160,64 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         return updatedVariant;
       });
 
-      // Step 2: Apply variant-specific logic based on priority order
+      // Step 2: Apply variant-specific logic for each variant independently
       updatedProduct.variants = updatedProduct.variants.map(variant => {
         const updatedVariant = {...variant};
         const metafields = {...updatedVariant.metafields};
         const discontinuedValue = metafields['custom.discontinued'];
         
-        // Define priority order for preproduct metafields
-        // 1. Discontinued (highest priority)
-        // 2. Launch pre-order
-        // 3. Special order
-        // 4. Notify me
-        // 5. Backorder
-        // 6. Pre-order (lowest priority)
+        // Set auto_preproduct_disablebutton to "no" by default
+        metafields.auto_preproduct_disablebutton = 'no';
         
-        // Check for discontinued items first (highest priority)
+        // Check each condition independently for each variant
+        
+        // Check for discontinued items (highest priority)
         if (isDiscontinued(discontinuedValue)) {
           metafields.auto_preproduct_preorder_discontinued = 'yes';
           metafields.auto_preproduct_disablebutton = 'yes';
-          updatedVariant.metafields = metafields;
-          return updatedVariant;
-        } else {
-          metafields.auto_preproduct_disablebutton = 'no';
         }
         
-        // Check for launch dates (second priority)
-        if (updatedVariant.launchDate) {
+        // Check for launch dates
+        else if (updatedVariant.launchDate) {
           const launchDate = new Date(updatedVariant.launchDate);
           const currentDate = new Date();
           
           // Only set launch tag if the launch date is in the future
           if (launchDate > currentDate) {
             metafields.auto_preproduct_preorder_launch = 'yes';
-            updatedVariant.metafields = metafields;
-            return updatedVariant;
           }
         }
         
-        // Check for special order conditions (third priority)
-        if (
+        // Check for special order conditions
+        else if (
           updatedVariant.inventory <= 0 && 
           !isDiscontinued(discontinuedValue) &&
           metafields['custom.ordering_min_qty'] === 1
         ) {
           metafields.auto_preproduct_preorder_specialorder = 'yes';
-          updatedVariant.metafields = metafields;
-          return updatedVariant;
         }
         
-        // Check for notify me conditions (extended backorder) (fourth priority)
+        // Check for notify me conditions (extended backorder)
         // If the variant has been in backorder for 4 or more weeks
-        if (
+        else if (
           updatedVariant.inventory <= 0 && 
           !isDiscontinued(discontinuedValue) &&
           updatedVariant.backorderWeeks >= 4
         ) {
           metafields.auto_preproduct_preorder_notifyme = 'yes';
-          updatedVariant.metafields = metafields;
-          return updatedVariant;
         }
         
-        // Check for backorder conditions (fifth priority)
-        if (
+        // Check for backorder conditions
+        else if (
           updatedVariant.inventory <= 0 && 
           !isDiscontinued(discontinuedValue)
         ) {
           metafields.auto_preproduct_preorder_backorder = 'yes';
-          updatedVariant.metafields = metafields;
-          return updatedVariant;
         }
         
-        // Apply preproduct_preorder according to refined logic (lowest priority)
+        // Apply preproduct_preorder according to refined logic
         // Only if the variant has never had stock before
-        if (
+        else if (
           updatedVariant.inventory <= 0 && 
           !updatedVariant.hadStockBefore
         ) {
@@ -244,6 +229,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
       });
       
       // Step 3: Generate product tags based on variant metafields
+      // A tag should be applied if ANY variant has the corresponding metafield set to "yes"
       const newTags: string[] = [];
       const metafieldKeys = [
         'auto_preproduct_preorder',

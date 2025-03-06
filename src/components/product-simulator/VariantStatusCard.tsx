@@ -15,7 +15,7 @@ const VariantStatusCard: React.FC<VariantStatusCardProps> = ({ variant }) => {
                          variant.metafields['custom.discontinued'] === 'Delisted';
   const disableButton = variant.metafields.auto_preproduct_disablebutton === 'yes';
   
-  // Get the active preproduct metafield (only one should be active at a time)
+  // Get the active preproduct metafield (only one should be active at a time per variant)
   const activeMetafield = Object.entries(variant.metafields)
     .find(([key, value]) => key.startsWith('auto_preproduct_preorder') && 
                         key !== 'auto_preproduct_disablebutton' && 
