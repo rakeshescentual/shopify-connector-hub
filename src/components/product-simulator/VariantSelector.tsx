@@ -3,7 +3,7 @@ import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { Plus, AlertCircle, CheckCircle, Clock, Info } from 'lucide-react';
 import { useProductContext } from '@/contexts/ProductContext';
 import { Badge } from '@/components/ui/badge';
 
@@ -25,7 +25,7 @@ const VariantSelector = () => {
       case 'pending':
         return <Clock className="h-3 w-3 text-amber-500" />;
       default:
-        return null;
+        return <Info className="h-3 w-3 text-gray-400" />;
     }
   };
 
@@ -39,8 +39,54 @@ const VariantSelector = () => {
       case 'pending':
         return 'Awaiting processing';
       default:
-        return 'Unknown status';
+        return 'No status available';
     }
+  };
+
+  // Get variant inventory status badge
+  const getInventoryBadge = (variant) => {
+    if (variant.inventory <= 0) {
+      return (
+        <Badge variant="outline" className="ml-1 text-xs py-0 h-4">
+          Out of Stock
+        </Badge>
+      );
+    }
+    
+    if (variant.inventory < 5) {
+      return (
+        <Badge variant="outline" className="ml-1 text-xs py-0 h-4 border-amber-300 text-amber-700">
+          Low Stock
+        </Badge>
+      );
+    }
+    
+    return null;
+  };
+
+  // Format timestamp in a more readable format
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return null;
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.round(diffMs / 60000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    
+    // Return time if same day, otherwise date and time
+    if (date.toDateString() === now.toDateString()) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    return date.toLocaleString([], { 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
   };
 
   return (
@@ -67,17 +113,13 @@ const VariantSelector = () => {
                   
                   <span className="flex items-center gap-1">
                     {variant.title}
-                    {variant.inventory <= 0 && (
-                      <Badge variant="outline" className="ml-1 text-xs py-0 h-4">
-                        Out of Stock
-                      </Badge>
-                    )}
+                    {getInventoryBadge(variant)}
                   </span>
                 </div>
                 
                 {variant.lastUpdated && (
                   <span className="text-xs text-muted-foreground ml-2">
-                    ({new Date(variant.lastUpdated).toLocaleTimeString()})
+                    ({formatTimestamp(variant.lastUpdated)})
                   </span>
                 )}
               </SelectItem>
