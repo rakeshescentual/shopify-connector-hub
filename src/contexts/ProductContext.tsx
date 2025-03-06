@@ -212,12 +212,15 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
         
         // Check for notify me conditions (extended backorder)
+        // If the variant has been in backorder for 4 or more weeks,
+        // transition from backorder to notify me status
         if (
           updatedVariant.backorderWeeks >= 4 && 
           metafields.auto_preproduct_preorder_backorder === 'yes'
         ) {
           metafields.auto_preproduct_preorder_backorder = 'no';
           metafields.auto_preproduct_preorder_notifyme = 'yes';
+          console.log(`Variant transitioned to notify me status after ${updatedVariant.backorderWeeks} weeks in backorder: ${updatedVariant.title}`);
         }
         
         // Apply preproduct_preorder according to refined logic

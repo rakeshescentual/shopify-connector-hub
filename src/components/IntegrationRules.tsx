@@ -141,11 +141,11 @@ const IntegrationRules = () => {
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">auto_preproduct_preorder_backorder</TableCell>
-                          <TableCell>custom.discontinued is not "By Manufacturer" or "Delisted" and no other higher priority preproduct metafields are "yes".</TableCell>
+                          <TableCell>Inventory ≤ 0, custom.discontinued is not "By Manufacturer" or "Delisted", and no other higher priority preproduct metafields are "yes".</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">auto_preproduct_preorder_notifyme</TableCell>
-                          <TableCell>Product has been in backorder status for 4 consecutive weeks (timer resets if stock arrives temporarily).</TableCell>
+                          <TableCell>Variant has been in backorder status for 4 or more consecutive weeks. Replaces backorder status when this threshold is reached.</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">auto_preproduct_preorder_discontinued</TableCell>
@@ -186,7 +186,7 @@ const IntegrationRules = () => {
                       
                       <div className="border p-3 rounded-md">
                         <Badge className="mb-2">preproduct_preorder_notifyme</Badge>
-                        <p className="text-xs text-gray-600">Applied after extended backorder periods</p>
+                        <p className="text-xs text-gray-600">Applied after extended backorder periods (4+ weeks)</p>
                       </div>
                       
                       <div className="border p-3 rounded-md">

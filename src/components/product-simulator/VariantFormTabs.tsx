@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Info, AlertCircle, Tag, Package, Calendar, ShoppingBag } from 'lucide-react';
+import { Info, AlertCircle, Tag, Package, Calendar, ShoppingBag, Clock } from 'lucide-react';
 import { useProductContext } from '@/contexts/ProductContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
@@ -30,6 +31,17 @@ const VariantFormTabs = () => {
     editableVariant.inventory <= 0 && 
     editableVariant.metafields['custom.discontinued'] !== 'By Manufacturer' &&
     editableVariant.metafields['custom.ordering_min_qty'] === 1;
+
+  const isNotifyMeEligible = 
+    editableVariant.inventory <= 0 && 
+    editableVariant.metafields['custom.discontinued'] !== 'By Manufacturer' && 
+    editableVariant.metafields['custom.discontinued'] !== 'Delisted' &&
+    editableVariant.backorderWeeks >= 4;
+
+  const isBackorderEligible = 
+    editableVariant.inventory <= 0 && 
+    editableVariant.metafields['custom.discontinued'] !== 'By Manufacturer' && 
+    editableVariant.metafields['custom.discontinued'] !== 'Delisted';
 
   return (
     <TooltipProvider>
@@ -227,15 +239,35 @@ const VariantFormTabs = () => {
               </div>
             </div>
             
-            <div>
+            <div className={`p-4 rounded-md border ${isNotifyMeEligible ? 'bg-purple-50 border-purple-200' : (isBackorderEligible ? 'bg-amber-50 border-amber-200' : 'bg-white/70 border-border')}`}>
               <div className="flex items-center gap-2 mb-1">
-                <Label htmlFor="variant-backorder-weeks" className="text-sm font-medium">Weeks in Backorder</Label>
+                <Label 
+                  htmlFor="variant-backorder-weeks" 
+                  className={`text-sm font-medium ${isNotifyMeEligible ? 'text-purple-700' : (isBackorderEligible ? 'text-amber-700' : '')}`}
+                >
+                  Weeks in Backorder
+                </Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <AlertCircle size={14} className="text-muted-foreground cursor-help" />
+                    <Clock 
+                      size={14} 
+                      className={`cursor-help ${isNotifyMeEligible ? 'text-purple-500' : (isBackorderEligible ? 'text-amber-500' : 'text-muted-foreground')}`} 
+                    />
                   </TooltipTrigger>
-                  <TooltipContent side="right">
-                    Number of consecutive weeks this item has been in backorder
+                  <TooltipContent side="right" className="max-w-xs">
+                    <div className="space-y-2">
+                      <p>Number of consecutive weeks this item has been in backorder</p>
+                      {isNotifyMeEligible && (
+                        <p className="text-purple-600 font-medium">
+                          This variant has been in backorder for {editableVariant.backorderWeeks} weeks and qualifies for notify me status
+                        </p>
+                      )}
+                      {isBackorderEligible && !isNotifyMeEligible && (
+                        <p className="text-amber-600 font-medium">
+                          This variant is eligible for backorder status
+                        </p>
+                      )}
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -244,12 +276,19 @@ const VariantFormTabs = () => {
                 type="number" 
                 value={editableVariant.backorderWeeks} 
                 onChange={(e) => handleVariantChange('backorderWeeks', parseInt(e.target.value) || 0)} 
-                className="transition-all focus:ring-1 bg-white/70"
+                className={`transition-all focus:ring-1 ${isNotifyMeEligible ? 'border-purple-300 bg-white' : (isBackorderEligible ? 'border-amber-300 bg-white' : 'bg-white/70')}`}
               />
-              <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
-                <AlertCircle size={14} />
-                After 4 consecutive weeks, "Notify Me" status will be applied
-              </p>
+              {isNotifyMeEligible ? (
+                <div className="mt-2 text-xs text-purple-600 flex items-center gap-1">
+                  <AlertCircle size={14} />
+                  <span>After 4 weeks in backorder, notify me status is applied</span>
+                </div>
+              ) : (
+                <div className="mt-2 text-xs text-amber-600 flex items-center gap-1">
+                  <AlertCircle size={14} />
+                  <span>After 4 consecutive weeks, "Notify Me" status will be applied</span>
+                </div>
+              )}
             </div>
           </div>
         </TabsContent>
@@ -281,7 +320,7 @@ const VariantFormTabs = () => {
                           {key === 'auto_preproduct_preorder_launch' && 'Future launch date pre-order'}
                           {key === 'auto_preproduct_preorder_specialorder' && 'Special order status'}
                           {key === 'auto_preproduct_preorder_backorder' && 'Currently in backorder'}
-                          {key === 'auto_preproduct_preorder_notifyme' && 'Long-term backorder status'}
+                          {key === 'auto_preproduct_preorder_notifyme' && 'Long-term backorder status (4+ weeks)'}
                           {key === 'auto_preproduct_preorder_discontinued' && 'Discontinued by manufacturer'}
                           {key === 'auto_preproduct_disablebutton' && 'Disables the purchase button'}
                         </TooltipContent>
