@@ -143,12 +143,14 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         const updatedVariant = {...variant};
         const metafields = {...updatedVariant.metafields};
         
+        // Reset all preproduct metafields to "no" first
         Object.keys(metafields).forEach(key => {
           if (key.startsWith('auto_preproduct_preorder') && key !== 'auto_preproduct_disablebutton') {
             (metafields as any)[key] = 'no';
           }
         });
         
+        // Check for discontinued items first (highest priority)
         if (metafields['custom.discontinued'] === 'By Manufacturer' || metafields['custom.discontinued'] === 'Delisted') {
           metafields.auto_preproduct_preorder_discontinued = 'yes';
           metafields.auto_preproduct_disablebutton = 'yes';
@@ -156,10 +158,12 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           metafields.auto_preproduct_disablebutton = 'no';
         }
         
+        // Check for launch dates
         if (updatedVariant.launchDate && new Date(updatedVariant.launchDate) > new Date()) {
           metafields.auto_preproduct_preorder_launch = 'yes';
         }
         
+        // Check for special order conditions
         if (
           updatedVariant.inventory <= 0 && 
           metafields['custom.discontinued'] !== 'By Manufacturer' && 
@@ -170,6 +174,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           metafields.auto_preproduct_preorder_specialorder = 'yes';
         }
         
+        // Check for backorder conditions
         if (
           updatedVariant.inventory <= 0 && 
           metafields['custom.discontinued'] !== 'By Manufacturer' && 
@@ -181,6 +186,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           metafields.auto_preproduct_preorder_backorder = 'yes';
         }
         
+        // Check for notify me conditions (extended backorder)
         if (
           updatedVariant.backorderWeeks >= 4 && 
           metafields.auto_preproduct_preorder_backorder === 'yes'
@@ -189,12 +195,15 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           metafields.auto_preproduct_preorder_notifyme = 'yes';
         }
         
+        // Apply preproduct_preorder according to specified logic
         if (
           updatedVariant.inventory <= 0 && 
-          !updatedVariant.hadStockBefore &&
-          Object.entries(metafields)
-            .filter(([key]) => key.startsWith('auto_preproduct_preorder') && key !== 'auto_preproduct_disablebutton')
-            .every(([, value]) => value === 'no')
+          metafields.auto_preproduct_preorder_launch === 'no' &&
+          metafields.auto_preproduct_preorder_specialorder === 'no' &&
+          metafields.auto_preproduct_preorder_backorder === 'no' &&
+          metafields.auto_preproduct_preorder_notifyme === 'no' &&
+          metafields.auto_preproduct_preorder_discontinued === 'no'
+          // Product is assumed to be available for sale in this simulator
         ) {
           metafields.auto_preproduct_preorder = 'yes';
         }
@@ -203,6 +212,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         return updatedVariant;
       });
       
+      // Generate tags based on metafields
       const newTags: string[] = [];
       
       ['auto_preproduct_preorder', 
@@ -220,6 +230,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
       });
       
+      // Logic for Quick Buy disabling
       const hasMultipleVariants = updatedProduct.variants.length > 1;
       const hasOutOfStockVariant = updatedProduct.variants.some(v => v.inventory <= 0);
       const hasPreProductTag = newTags.length > 0;
