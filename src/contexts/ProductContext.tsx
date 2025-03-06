@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 export interface ProductVariant {
@@ -167,9 +168,21 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           metafields.auto_preproduct_disablebutton = 'no';
         }
         
-        // Check for launch dates
-        if (updatedVariant.launchDate && new Date(updatedVariant.launchDate) > new Date()) {
-          metafields.auto_preproduct_preorder_launch = 'yes';
+        // Check for launch dates - UPDATED logic for preproduct_preorder_launch
+        if (updatedVariant.launchDate) {
+          const launchDate = new Date(updatedVariant.launchDate);
+          const currentDate = new Date();
+          
+          // Only set launch tag if the launch date is in the future
+          if (launchDate > currentDate) {
+            metafields.auto_preproduct_preorder_launch = 'yes';
+            
+            // Orders are put on hold until 2 days before launch
+            // (This would be implemented in a real system, simulated here)
+            const orderHoldDate = new Date(launchDate);
+            orderHoldDate.setDate(launchDate.getDate() - 2);
+            console.log(`Orders would be held until: ${orderHoldDate.toDateString()}`);
+          }
         }
         
         // Check for special order conditions

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Info, AlertCircle, Tag, Package, Calendar } from 'lucide-react';
 import { useProductContext } from '@/contexts/ProductContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { format } from 'date-fns';
 
 const VariantFormTabs = () => {
   const { editableVariant, handleVariantChange } = useProductContext();
@@ -21,6 +22,11 @@ const VariantFormTabs = () => {
       handleVariantChange(`metafields.${key}`, String(value));
     }
   };
+
+  // Calculate if the launch date is in the future
+  const isLaunchDateInFuture = editableVariant.launchDate 
+    ? new Date(editableVariant.launchDate) > new Date() 
+    : false;
 
   return (
     <TooltipProvider>
@@ -89,15 +95,24 @@ const VariantFormTabs = () => {
               </Select>
             </div>
             
-            <div>
+            <div className={`p-4 rounded-md border ${isLaunchDateInFuture ? 'bg-blue-50 border-blue-200' : 'bg-white/70 border-border'}`}>
               <div className="flex items-center gap-2 mb-1">
-                <Label htmlFor="variant-launchdate" className="text-sm font-medium">Launch Date</Label>
+                <Label htmlFor="variant-launchdate" className={`text-sm font-medium ${isLaunchDateInFuture ? 'text-blue-700' : ''}`}>
+                  Launch Date
+                </Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Calendar size={14} className="text-muted-foreground cursor-help" />
+                    <Calendar size={14} className={`cursor-help ${isLaunchDateInFuture ? 'text-blue-500' : 'text-muted-foreground'}`} />
                   </TooltipTrigger>
-                  <TooltipContent side="right">
-                    Set for future launches to enable pre-order status
+                  <TooltipContent side="right" className="max-w-xs">
+                    <div className="space-y-2">
+                      <p>Set for future launches to enable pre-order status</p>
+                      {isLaunchDateInFuture && (
+                        <p className="text-blue-600 font-medium">
+                          This variant has a future launch date and will trigger preproduct_preorder_launch status
+                        </p>
+                      )}
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -106,8 +121,22 @@ const VariantFormTabs = () => {
                 type="date" 
                 value={editableVariant.launchDate || ''} 
                 onChange={(e) => handleVariantChange('launchDate', e.target.value || null)} 
-                className="transition-all focus:ring-1 bg-white/70"
+                className={`transition-all focus:ring-1 ${isLaunchDateInFuture ? 'border-blue-300 bg-white' : 'bg-white/70'}`}
               />
+              {editableVariant.launchDate && (
+                <div className="mt-2 text-xs">
+                  {isLaunchDateInFuture ? (
+                    <div className="text-blue-600 flex items-center gap-1">
+                      <Calendar size={12} />
+                      <span>Future launch date will trigger pre-order status</span>
+                    </div>
+                  ) : (
+                    <div className="text-gray-500">
+                      Past launch date
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </TabsContent>
