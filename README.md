@@ -1,69 +1,72 @@
-# Welcome to your Lovable project
 
-## Project info
+# PreProduct Integration Platform
+
+## Project Overview
+
+This application manages and simulates PreProduct's integration with Shopify, providing a toolkit for merchants to handle product inventory, pre-order, backorder, and discontinued statuses.
 
 **URL**: https://lovable.dev/projects/fcc19462-52bd-49e4-9221-abe224c18177
 
-## How can I edit this code?
+## Key Features
 
-There are several ways of editing your application.
+- **Product Status Management**: Intelligent handling of product statuses based on inventory, launch dates, and discontinuation
+- **Integration Simulator**: Test your product configurations against our processing logic
+- **Interactive Documentation**: Comprehensive guides on PreProduct rules and integration patterns
+- **Shopify Connector**: Easy setup flow for connecting your Shopify store
 
-**Use Lovable**
+## Technical Documentation
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/fcc19462-52bd-49e4-9221-abe224c18177) and start prompting.
+### Core Processing Logic
 
-Changes made via Lovable will be committed automatically to this repo.
+The application uses a hierarchical set of rules to process product variants:
 
-**Use your preferred IDE**
+1. **Variant Processing**: Each variant is analyzed using the rules in `variantProcessor.ts`
+2. **Product-Level Logic**: Tags and QuickBuy status are determined based on variant states
+3. **Status Prioritization**: Follows strict priority order (Discontinued > Launch Date > Notify Me > etc.)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### For Developers
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+The codebase is organized into the following key sections:
 
-Follow these steps:
+- `/contexts`: Contains the product context and processing logic
+- `/components`: UI components including the interactive simulator
+- `/pages`: Main application pages including simulator, rules documentation, and landing page
+
+### Integration with Gadget.dev
+
+This application is prepared for transfer to Gadget.dev with:
+
+- Clean separation of business logic and UI
+- TypeScript interfaces for all data models
+- Comprehensive error handling and status tracking
+- Well-documented processing rules
+
+## How to Use the Application
+
+### For Testing
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Step 1: Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Step 2: Navigate to the project directory
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Step 3: Install dependencies
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### For Production
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Deploy this application by opening [Lovable](https://lovable.dev/projects/fcc19462-52bd-49e4-9221-abe224c18177) and clicking on Share -> Publish.
 
-**Use GitHub Codespaces**
+## Custom Domain Setup
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+We don't support custom domains directly. If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
 
-## What technologies are used for this project?
+## API Documentation
 
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/fcc19462-52bd-49e4-9221-abe224c18177) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+For detailed API documentation to integrate with Gadget.dev, refer to the [Integration Rules](/rules) section of the application.

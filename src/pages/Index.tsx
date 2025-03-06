@@ -8,7 +8,7 @@ import ConfigSection from '@/components/ConfigSection';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { BookOpen, Play } from 'lucide-react';
+import { BookOpen, Play, FileText } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -36,6 +36,12 @@ const Index = () => {
               <Link to="/simulator">
                 <Play size={18} />
                 Product Simulator
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="secondary" className="gap-2">
+              <Link to="/documentation">
+                <FileText size={18} />
+                Developer Docs
               </Link>
             </Button>
           </div>
