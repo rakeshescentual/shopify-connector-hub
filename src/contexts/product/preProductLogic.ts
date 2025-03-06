@@ -1,3 +1,4 @@
+
 import { Product, ProductVariant, DiscontinuedValue } from './types';
 import { isDiscontinued, getMetafieldTags } from './utils';
 import { toast } from '@/components/ui/use-toast';
@@ -91,7 +92,7 @@ const resetVariantPreProductMetafields = (metafields: ProductVariant['metafields
  * Applies metafield logic based on priority
  */
 const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: ProductVariant['metafields']): void => {
-  const discontinuedValue: DiscontinuedValue = metafields['custom.discontinued'];
+  const discontinuedValue = metafields['custom.discontinued'] as DiscontinuedValue;
   
   // Priority 1: Check for discontinued by manufacturer
   if (discontinuedValue === 'By Manufacturer') {
@@ -112,7 +113,7 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
   
   // Priority 3: Check for notify me conditions (extended backorder)
   if (variant.inventory <= 0 && 
-      !isDiscontinued(discontinuedValue) &&
+      discontinuedValue !== 'By Manufacturer' &&
       variant.backorderWeeks >= 4) {
     metafields.auto_preproduct_preorder_notifyme = 'yes';
     return;
@@ -127,15 +128,16 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
   }
   
   // Priority 5: Check for backorder conditions
-  if (discontinuedValue !== 'By Manufacturer' && 
+  if (variant.inventory <= 0 && 
+      discontinuedValue !== 'By Manufacturer' && 
       discontinuedValue !== 'Delisted') {
     metafields.auto_preproduct_preorder_backorder = 'yes';
     return;
   }
   
-  // Priority 6 (lowest): Apply standard preorder status when no other condition is met
-  // and the inventory is zero
-  if (variant.inventory <= 0) {
+  // Priority 6 (lowest): Apply standard preorder status when no other condition is met,
+  // the inventory is zero, and the variant has never had stock before
+  if (variant.inventory <= 0 && !variant.hadStockBefore) {
     metafields.auto_preproduct_preorder = 'yes';
     return;
   }
