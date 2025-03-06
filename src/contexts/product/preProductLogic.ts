@@ -1,3 +1,4 @@
+
 import { Product, ProductVariant, DiscontinuedValue } from './types';
 import { isDiscontinued, getMetafieldTags } from './utils';
 import { toast } from '@/components/ui/use-toast';
@@ -94,7 +95,6 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
   const discontinuedValue = metafields['custom.discontinued'] as DiscontinuedValue;
   
   // Priority 1: Check for discontinued by manufacturer or delisted
-  // Use type-safe comparison
   if (discontinuedValue === 'By Manufacturer' || discontinuedValue === 'Delisted') {
     metafields.auto_preproduct_preorder_discontinued = 'yes';
     return; // Exit early as we've set the highest priority metafield
@@ -115,7 +115,6 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
   // For notifyme, we reset the 4-week timer if item comes back in stock then goes out again
   // This means we only apply the tag if the current inventory is <= 0 AND backorderWeeks >= 4
   if (variant.inventory <= 0 && 
-      discontinuedValue !== 'By Manufacturer' &&
       variant.backorderWeeks >= 4) {
     metafields.auto_preproduct_preorder_notifyme = 'yes';
     return;
@@ -124,7 +123,6 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
   // Priority 4: Check for special order conditions
   // Must be out of stock (inventory <= 0) and have min qty of 1
   if (variant.inventory <= 0 && 
-      discontinuedValue !== 'By Manufacturer' &&
       metafields['custom.ordering_min_qty'] === 1) {
     metafields.auto_preproduct_preorder_specialorder = 'yes';
     return;
