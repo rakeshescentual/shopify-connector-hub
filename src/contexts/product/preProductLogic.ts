@@ -11,34 +11,11 @@ export const applyPreProductLogic = (currentProduct: Product, setProduct: React.
     
     // Ensure all variants have correct default values for metafields
     updatedProduct.variants = updatedProduct.variants.map(variant => {
-      const updatedVariant = {...variant};
-      const metafields = {...updatedVariant.metafields};
-      
-      // Validate and set defaults for custom.discontinued
-      if (!metafields['custom.discontinued']) {
-        metafields['custom.discontinued'] = 'No';
-      }
-      
-      // Validate and set defaults for custom.ordering_min_qty
-      if (metafields['custom.ordering_min_qty'] === undefined || metafields['custom.ordering_min_qty'] === null) {
-        metafields['custom.ordering_min_qty'] = 1;
-      }
-      
-      updatedVariant.metafields = metafields;
-      return updatedVariant;
+      return processVariantUpdate(variant);
     });
     
-    // Step 1: Reset all preproduct metafields
-    resetPreProductMetafields(updatedProduct);
-
-    // Step 2: Apply variant-specific logic for each variant independently
-    applyVariantLogic(updatedProduct);
-    
-    // Step 3: Generate product tags based on variant metafields
-    generateProductTags(updatedProduct);
-    
-    // Step 4: Update Quick Buy status based on variant conditions
-    updateQuickBuyStatus(updatedProduct);
+    // Apply product-level logic after processing all variants
+    processProductUpdate(updatedProduct);
     
     setProduct(updatedProduct);
     setIsProcessing(false);
@@ -50,93 +27,125 @@ export const applyPreProductLogic = (currentProduct: Product, setProduct: React.
   }, 1000);
 };
 
-const resetPreProductMetafields = (product: Product): void => {
-  product.variants = product.variants.map(variant => {
-    const updatedVariant = {...variant};
-    const metafields = {...updatedVariant.metafields};
-    
+/**
+ * Processes a variant update according to the defined business logic
+ */
+const processVariantUpdate = (variant: ProductVariant): ProductVariant => {
+  const updatedVariant = {...variant};
+  const metafields = {...updatedVariant.metafields};
+  
+  // Step 1: Handle discontinued and inventory conditions first (highest priority)
+  if ((metafields['custom.discontinued'] === 'Delisted' || 
+       metafields['custom.discontinued'] === 'By Manufacturer') && 
+      updatedVariant.inventory <= 0) {
     // Reset all preproduct metafields to "no" first
-    Object.keys(metafields).forEach(key => {
-      if (key.startsWith('auto_preproduct_preorder') && key !== 'auto_preproduct_disablebutton') {
-        (metafields as any)[key] = 'no';
-      }
-    });
+    resetVariantPreProductMetafields(metafields);
     
-    // Also reset the disablebutton metafield to "no"
-    metafields.auto_preproduct_disablebutton = 'no';
+    // Set only discontinued metafield to "yes"
+    metafields.auto_preproduct_preorder_discontinued = 'yes';
+    metafields.auto_preproduct_disablebutton = 'yes';
     
     updatedVariant.metafields = metafields;
     return updatedVariant;
+  }
+  
+  // Step 2: For non-discontinued variants, reset and apply standard logic
+  metafields.auto_preproduct_disablebutton = 'no';
+  
+  // Ensure default values for required metafields
+  if (!metafields['custom.discontinued']) {
+    metafields['custom.discontinued'] = 'No';
+  }
+  
+  if (metafields['custom.ordering_min_qty'] === undefined || 
+      metafields['custom.ordering_min_qty'] === null) {
+    metafields['custom.ordering_min_qty'] = 1;
+  }
+  
+  // Reset all preproduct metafields before applying logic
+  resetVariantPreProductMetafields(metafields);
+  
+  // Step 3: Apply metafield conditions based on priority
+  applyPrioritizedMetafieldLogic(updatedVariant, metafields);
+  
+  updatedVariant.metafields = metafields;
+  return updatedVariant;
+};
+
+/**
+ * Resets all preproduct metafields to "no"
+ */
+const resetVariantPreProductMetafields = (metafields: ProductVariant['metafields']): void => {
+  // Reset all preproduct metafields to "no"
+  Object.keys(metafields).forEach(key => {
+    if (key.startsWith('auto_preproduct_preorder') && key !== 'auto_preproduct_disablebutton') {
+      (metafields as any)[key] = 'no';
+    }
   });
 };
 
-const applyVariantLogic = (product: Product): void => {
-  product.variants = product.variants.map(variant => {
-    const updatedVariant = {...variant};
-    const metafields = {...updatedVariant.metafields};
-    const discontinuedValue = metafields['custom.discontinued'];
+/**
+ * Applies metafield logic based on priority
+ */
+const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: ProductVariant['metafields']): void => {
+  const discontinuedValue = metafields['custom.discontinued'];
+  
+  // Priority 1: Check for launch dates (future products)
+  if (variant.launchDate) {
+    const launchDate = new Date(variant.launchDate);
+    const currentDate = new Date();
     
-    // Check each condition independently for each variant
-    
-    // Check for discontinued items (highest priority)
-    if (isDiscontinued(discontinuedValue) && updatedVariant.inventory <= 0) {
-      metafields.auto_preproduct_preorder_discontinued = 'yes';
-      // Set auto_preproduct_disablebutton to "yes" for discontinued items with no inventory
-      metafields.auto_preproduct_disablebutton = 'yes';
+    if (launchDate > currentDate) {
+      metafields.auto_preproduct_preorder_launch = 'yes';
+      return; // Exit early as we've set the highest priority metafield
     }
-    
-    // Check for launch dates
-    else if (updatedVariant.launchDate) {
-      const launchDate = new Date(updatedVariant.launchDate);
-      const currentDate = new Date();
-      
-      // Only set launch tag if the launch date is in the future
-      if (launchDate > currentDate) {
-        metafields.auto_preproduct_preorder_launch = 'yes';
-      }
-    }
-    
-    // Check for special order conditions
-    else if (
-      updatedVariant.inventory <= 0 && 
+  }
+  
+  // Priority 2: Check for notify me conditions (extended backorder)
+  if (variant.inventory <= 0 && 
       !isDiscontinued(discontinuedValue) &&
-      metafields['custom.ordering_min_qty'] === 1
-    ) {
-      metafields.auto_preproduct_preorder_specialorder = 'yes';
-    }
-    
-    // Check for notify me conditions (extended backorder)
-    // If the variant has been in backorder for 4 or more weeks
-    else if (
-      updatedVariant.inventory <= 0 && 
+      variant.backorderWeeks >= 4) {
+    metafields.auto_preproduct_preorder_notifyme = 'yes';
+    return;
+  }
+  
+  // Priority 3: Check for special order conditions
+  if (variant.inventory <= 0 && 
       !isDiscontinued(discontinuedValue) &&
-      updatedVariant.backorderWeeks >= 4
-    ) {
-      metafields.auto_preproduct_preorder_notifyme = 'yes';
-    }
-    
-    // Check for backorder conditions
-    else if (
-      updatedVariant.inventory <= 0 && 
-      !isDiscontinued(discontinuedValue)
-    ) {
-      metafields.auto_preproduct_preorder_backorder = 'yes';
-    }
-    
-    // Apply preproduct_preorder according to refined logic
-    // Only if the variant has never had stock before
-    else if (
-      updatedVariant.inventory <= 0 && 
-      !updatedVariant.hadStockBefore
-    ) {
-      metafields.auto_preproduct_preorder = 'yes';
-    }
-    
-    updatedVariant.metafields = metafields;
-    return updatedVariant;
-  });
+      metafields['custom.ordering_min_qty'] === 1) {
+    metafields.auto_preproduct_preorder_specialorder = 'yes';
+    return;
+  }
+  
+  // Priority 4: Check for backorder conditions
+  if (variant.inventory <= 0 && 
+      !isDiscontinued(discontinuedValue)) {
+    metafields.auto_preproduct_preorder_backorder = 'yes';
+    return;
+  }
+  
+  // Priority 5 (lowest): Apply standard preorder status for new products
+  if (variant.inventory <= 0 && 
+      !variant.hadStockBefore) {
+    metafields.auto_preproduct_preorder = 'yes';
+    return;
+  }
 };
 
+/**
+ * Processes product-level updates after all variants have been processed
+ */
+const processProductUpdate = (product: Product): void => {
+  // Generate product tags based on variant metafields
+  generateProductTags(product);
+  
+  // Update Quick Buy status based on variant conditions
+  updateQuickBuyStatus(product);
+};
+
+/**
+ * Generates product tags based on variant metafields
+ */
 const generateProductTags = (product: Product): void => {
   const newTags: string[] = [];
   const metafieldKeys = getMetafieldTags();
@@ -155,6 +164,9 @@ const generateProductTags = (product: Product): void => {
   product.tags = newTags;
 };
 
+/**
+ * Updates the quick buy status based on variant conditions
+ */
 const updateQuickBuyStatus = (product: Product): void => {
   const hasMultipleVariants = product.variants.length > 1;
   
