@@ -120,6 +120,7 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
   }
   
   // Priority 4: Check for special order conditions
+  // Must be out of stock (inventory <= 0) and have min qty of 1
   if (variant.inventory <= 0 && 
       discontinuedValue !== 'By Manufacturer' &&
       metafields['custom.ordering_min_qty'] === 1) {
