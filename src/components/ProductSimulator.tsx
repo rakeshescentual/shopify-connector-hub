@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -275,26 +274,23 @@ const ProductSimulator = () => {
       setEditableVariant(prev => {
         if (!prev) return prev;
         
-        const updatedMetafields = { ...prev.metafields };
-        
         if (metafieldKey === 'custom.ordering_min_qty') {
-          updatedMetafields[metafieldKey] = typeof value === 'number' ? value : parseInt(value) || 0;
-        } else {
-          // Create a new object with the appropriate type to avoid type errors
-          const newMetafields = {
-            ...updatedMetafields,
-            [metafieldKey]: value
-          };
-          
           return {
             ...prev,
-            metafields: newMetafields as ProductVariant['metafields']
+            metafields: {
+              ...prev.metafields,
+              [metafieldKey]: typeof value === 'number' ? value : parseInt(value) || 0
+            }
           };
         }
         
+        // For all other metafields, ensure we're dealing with strings
         return {
           ...prev,
-          metafields: updatedMetafields
+          metafields: {
+            ...prev.metafields,
+            [metafieldKey]: String(value)
+          }
         };
       });
     } else {
