@@ -44,7 +44,7 @@ const ContextualHelp: React.FC = () => {
   return (
     <Card className="mt-6 overflow-hidden border-primary/20 shadow-md">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CardHeader className="py-3 bg-primary/5 flex flex-row items-center justify-between space-y-0 group cursor-pointer" asChild>
+        <CardHeader className="py-3 bg-primary/5 flex flex-row items-center justify-between space-y-0 group cursor-pointer">
           <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
             <div className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-amber-500" />
