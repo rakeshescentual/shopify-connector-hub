@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, AlertCircle, CheckCircle, Clock, Info, Search } from 'lucide-react';
+import { Plus, AlertCircle, CheckCircle, Clock, Info, Search, Filter } from 'lucide-react';
 import { useProductContext } from '@/contexts/ProductContext';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 
 const VariantSelector = () => {
   const { 
@@ -16,8 +18,20 @@ const VariantSelector = () => {
   } = useProductContext();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<string>('all');
 
-  // Helper function to render status icon
+  const variantGroups = useMemo(() => {
+    const groups = new Set<string>();
+    groups.add('all');
+    
+    product.variants.forEach(variant => {
+      const group = variant.title.split('-')[0].trim();
+      if (group) groups.add(group);
+    });
+    
+    return Array.from(groups);
+  }, [product.variants]);
+
   const getStatusIcon = (status?: string) => {
     switch(status) {
       case 'active':
@@ -31,7 +45,6 @@ const VariantSelector = () => {
     }
   };
 
-  // Helper function to get status tooltip text
   const getStatusTooltip = (status?: string) => {
     switch(status) {
       case 'active':
@@ -45,7 +58,6 @@ const VariantSelector = () => {
     }
   };
 
-  // Get variant inventory status badge
   const getInventoryBadge = (variant) => {
     if (variant.inventory <= 0) {
       return (
@@ -66,7 +78,6 @@ const VariantSelector = () => {
     return null;
   };
 
-  // Format timestamp in a more readable format
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return null;
     
@@ -78,7 +89,6 @@ const VariantSelector = () => {
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     
-    // Return time if same day, otherwise date and time
     if (date.toDateString() === now.toDateString()) {
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
@@ -91,10 +101,16 @@ const VariantSelector = () => {
     });
   };
 
-  // Filter variants based on search query
-  const filteredVariants = product.variants.filter(variant => 
-    variant.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredVariants = useMemo(() => {
+    return product.variants.filter(variant => {
+      const matchesSearch = variant.title.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesGroup = activeFilter === 'all' || 
+        variant.title.split('-')[0].trim() === activeFilter;
+      
+      return matchesSearch && matchesGroup;
+    });
+  }, [product.variants, searchQuery, activeFilter]);
 
   return (
     <div className="flex flex-col gap-4 mb-6">
@@ -111,7 +127,7 @@ const VariantSelector = () => {
                 </div>
               )}
               
-              <div className="p-2 sticky top-0 bg-background z-10">
+              <div className="p-2 sticky top-0 bg-background z-10 space-y-2">
                 <div className="relative">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -121,9 +137,43 @@ const VariantSelector = () => {
                     className="pl-8 h-9"
                   />
                 </div>
+                
+                {variantGroups.length > 2 && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1">
+                      <Filter className="h-3 w-3 text-muted-foreground" />
+                      <Label className="text-xs text-muted-foreground">Filter by group:</Label>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {variantGroups.map(group => (
+                        <Badge 
+                          key={group} 
+                          variant={activeFilter === group ? "default" : "outline"}
+                          className="cursor-pointer text-xs"
+                          onClick={() => setActiveFilter(group)}
+                        >
+                          {group === 'all' ? 'All' : group}
+                          {group !== 'all' && (
+                            <span className="ml-1 text-xs opacity-70">
+                              ({product.variants.filter(v => v.title.split('-')[0].trim() === group).length})
+                            </span>
+                          )}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <Separator className="my-2" />
               </div>
               
-              {(searchQuery.length > 0 ? filteredVariants : product.variants).map(variant => (
+              {(filteredVariants.length === 0 && activeFilter !== 'all') && (
+                <div className="py-2 px-3 text-sm text-muted-foreground">
+                  No variants in this group match your criteria
+                </div>
+              )}
+              
+              {filteredVariants.map(variant => (
                 <SelectItem key={variant.id} value={variant.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <TooltipProvider>
@@ -176,8 +226,8 @@ const VariantSelector = () => {
           <Info className="h-3 w-3" />
           <span>
             {product.variants.length} variants available. 
-            {searchQuery && filteredVariants.length < product.variants.length && 
-              `Showing ${filteredVariants.length} matches for "${searchQuery}".`
+            {(searchQuery || activeFilter !== 'all') && filteredVariants.length < product.variants.length && 
+              ` Showing ${filteredVariants.length} matches${searchQuery ? ` for "${searchQuery}"` : ''}.`
             }
           </span>
         </div>
