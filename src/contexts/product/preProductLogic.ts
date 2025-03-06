@@ -1,4 +1,3 @@
-
 import { Product, ProductVariant, DiscontinuedValue } from './types';
 import { isDiscontinued, getMetafieldTags } from './utils';
 import { toast } from '@/components/ui/use-toast';
@@ -41,10 +40,8 @@ const processVariantUpdate = (variant: ProductVariant): ProductVariant => {
     // Reset all preproduct metafields to "no" first
     resetVariantPreProductMetafields(metafields);
     
-    // Set discontinued metafield to "yes" if it's "By Manufacturer"
-    if (metafields['custom.discontinued'] === 'By Manufacturer') {
-      metafields.auto_preproduct_preorder_discontinued = 'yes';
-    }
+    // Set discontinued metafield to "yes" if it's "By Manufacturer" or "Delisted"
+    metafields.auto_preproduct_preorder_discontinued = 'yes';
     
     // Set the disable button to "yes" for both delisted and by manufacturer cases
     metafields.auto_preproduct_disablebutton = 'yes';
@@ -96,9 +93,9 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
   // Fix by explicitly casting to DiscontinuedValue type
   const discontinuedValue = metafields['custom.discontinued'] as DiscontinuedValue;
   
-  // Priority 1: Check for discontinued by manufacturer
+  // Priority 1: Check for discontinued by manufacturer or delisted
   // Use type-safe comparison
-  if (discontinuedValue === 'By Manufacturer') {
+  if (discontinuedValue === 'By Manufacturer' || discontinuedValue === 'Delisted') {
     metafields.auto_preproduct_preorder_discontinued = 'yes';
     return; // Exit early as we've set the highest priority metafield
   }
