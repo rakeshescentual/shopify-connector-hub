@@ -89,8 +89,7 @@ const resetVariantPreProductMetafields = (metafields: ProductVariant['metafields
  * Applies metafield logic based on priority
  */
 const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: ProductVariant['metafields']): void => {
-  // We need to ensure TypeScript treats discontinuedValue correctly
-  // Fix by explicitly casting to DiscontinuedValue type
+  // We need to explicitly cast to the correct type to avoid TypeScript inference issues
   const discontinuedValue = metafields['custom.discontinued'] as DiscontinuedValue;
   
   // Priority 1: Check for discontinued by manufacturer or delisted
@@ -128,7 +127,7 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
   }
   
   // Priority 5: Check for backorder conditions
-  // Fix the type comparison by ensuring discontinuedValue is properly typed
+  // Need to ensure discontinuedValue is properly typed for comparison
   if (variant.inventory <= 0 && 
       discontinuedValue !== 'By Manufacturer' && 
       discontinuedValue !== 'Delisted') {
