@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 export interface ProductVariant {
@@ -139,6 +138,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     setTimeout(() => {
       const updatedProduct = {...product};
       
+      // Step 1: Reset all preproduct metafields
       updatedProduct.variants = updatedProduct.variants.map(variant => {
         const updatedVariant = {...variant};
         const metafields = {...updatedVariant.metafields};
@@ -149,6 +149,15 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
             (metafields as any)[key] = 'no';
           }
         });
+        
+        updatedVariant.metafields = metafields;
+        return updatedVariant;
+      });
+
+      // Step 2: Apply variant-specific logic
+      updatedProduct.variants = updatedProduct.variants.map(variant => {
+        const updatedVariant = {...variant};
+        const metafields = {...updatedVariant.metafields};
         
         // Check for discontinued items first (highest priority)
         if (metafields['custom.discontinued'] === 'By Manufacturer' || metafields['custom.discontinued'] === 'Delisted') {
@@ -195,16 +204,15 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           metafields.auto_preproduct_preorder_notifyme = 'yes';
         }
         
-        // Apply preproduct_preorder according to specified logic
-        if (
-          updatedVariant.inventory <= 0 && 
+        // Apply preproduct_preorder according to refined logic
+        const hasNoOtherPreProductMetafields = 
           metafields.auto_preproduct_preorder_launch === 'no' &&
           metafields.auto_preproduct_preorder_specialorder === 'no' &&
           metafields.auto_preproduct_preorder_backorder === 'no' &&
           metafields.auto_preproduct_preorder_notifyme === 'no' &&
-          metafields.auto_preproduct_preorder_discontinued === 'no'
-          // Product is assumed to be available for sale in this simulator
-        ) {
+          metafields.auto_preproduct_preorder_discontinued === 'no';
+        
+        if (updatedVariant.inventory <= 0 && hasNoOtherPreProductMetafields) {
           metafields.auto_preproduct_preorder = 'yes';
         }
         
@@ -212,25 +220,29 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         return updatedVariant;
       });
       
-      // Generate tags based on metafields
+      // Step 3: Generate product tags based on variant metafields
       const newTags: string[] = [];
+      const metafieldKeys = [
+        'auto_preproduct_preorder',
+        'auto_preproduct_preorder_launch',
+        'auto_preproduct_preorder_specialorder',
+        'auto_preproduct_preorder_backorder',
+        'auto_preproduct_preorder_notifyme',
+        'auto_preproduct_preorder_discontinued'
+      ];
       
-      ['auto_preproduct_preorder', 
-       'auto_preproduct_preorder_launch', 
-       'auto_preproduct_preorder_specialorder', 
-       'auto_preproduct_preorder_backorder', 
-       'auto_preproduct_preorder_notifyme', 
-       'auto_preproduct_preorder_discontinued'].forEach(metafieldKey => {
+      metafieldKeys.forEach(metafieldKey => {
         const tagName = metafieldKey.replace('auto_', '');
-        
-        if (updatedProduct.variants.some(variant => 
+        const hasVariantWithMetafield = updatedProduct.variants.some(variant => 
           variant.metafields[metafieldKey as keyof typeof variant.metafields] === 'yes'
-        )) {
+        );
+        
+        if (hasVariantWithMetafield) {
           newTags.push(tagName);
         }
       });
       
-      // Logic for Quick Buy disabling
+      // Step 4: Update Quick Buy status based on variant conditions
       const hasMultipleVariants = updatedProduct.variants.length > 1;
       const hasOutOfStockVariant = updatedProduct.variants.some(v => v.inventory <= 0);
       const hasPreProductTag = newTags.length > 0;
@@ -240,7 +252,6 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         : 'no';
       
       updatedProduct.tags = newTags;
-      
       setProduct(updatedProduct);
       setIsProcessing(false);
       
