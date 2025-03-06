@@ -92,9 +92,12 @@ const resetVariantPreProductMetafields = (metafields: ProductVariant['metafields
  * Applies metafield logic based on priority
  */
 const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: ProductVariant['metafields']): void => {
+  // We need to ensure TypeScript treats discontinuedValue correctly
+  // Fix by explicitly casting to DiscontinuedValue type
   const discontinuedValue = metafields['custom.discontinued'] as DiscontinuedValue;
   
   // Priority 1: Check for discontinued by manufacturer
+  // Use type-safe comparison
   if (discontinuedValue === 'By Manufacturer') {
     metafields.auto_preproduct_preorder_discontinued = 'yes';
     return; // Exit early as we've set the highest priority metafield
