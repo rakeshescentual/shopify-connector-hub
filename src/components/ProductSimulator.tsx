@@ -3,9 +3,10 @@ import React from 'react';
 import { ProductProvider } from '@/contexts/ProductContext';
 import ProductForm from '@/components/product-simulator/ProductForm';
 import ProductPreview from '@/components/product-simulator/ProductPreview';
-import { AlertCircle, CheckCircle, Info, Tag } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info, Lightbulb, Tag } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
+import ContextualHelp from '@/components/product-simulator/ContextualHelp';
 
 const ProductSimulator = () => {
   return (
@@ -21,7 +22,7 @@ const ProductSimulator = () => {
         </div>
 
         <Tabs defaultValue="instructions" className="max-w-6xl mx-auto mb-8">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="instructions" className="flex items-center gap-1">
               <Info className="h-4 w-4" /> Instructions
             </TabsTrigger>
@@ -30,6 +31,9 @@ const ProductSimulator = () => {
             </TabsTrigger>
             <TabsTrigger value="tags" className="flex items-center gap-1">
               <Tag className="h-4 w-4" /> Tag Effects
+            </TabsTrigger>
+            <TabsTrigger value="tutorial" className="flex items-center gap-1">
+              <Lightbulb className="h-4 w-4" /> Tutorial
             </TabsTrigger>
           </TabsList>
           
@@ -129,6 +133,60 @@ const ProductSimulator = () => {
               </CardContent>
             </Card>
           </TabsContent>
+          
+          <TabsContent value="tutorial">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-5">
+                  <h3 className="font-medium text-primary">Quick Start Tutorial</h3>
+                  
+                  <div className="space-y-4">
+                    <div className="border-l-4 border-blue-400 pl-4 py-2">
+                      <h4 className="font-medium text-sm mb-1">Step 1: Create Test Variants</h4>
+                      <p className="text-xs text-gray-600">
+                        Click "Add" to create a new variant. Try naming it using a pattern like "Category-Name" 
+                        (e.g., "Color-Blue"). This helps with organization when you have many variants.
+                      </p>
+                    </div>
+                    
+                    <div className="border-l-4 border-blue-400 pl-4 py-2">
+                      <h4 className="font-medium text-sm mb-1">Step 2: Test Common Scenarios</h4>
+                      <p className="text-xs text-gray-600">
+                        Create these test variants to see different PreProduct behaviors:
+                      </p>
+                      <ul className="text-xs text-gray-600 list-disc pl-5 mt-1 space-y-1">
+                        <li>An out-of-stock item (Inventory = 0)</li>
+                        <li>A discontinued item (set "Discontinued Status" to "By Manufacturer")</li>
+                        <li>A future product (set a Launch Date in the future)</li>
+                        <li>A long-term backorder (set Backorder Weeks to 5 or higher)</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="border-l-4 border-blue-400 pl-4 py-2">
+                      <h4 className="font-medium text-sm mb-1">Step 3: Apply and Compare</h4>
+                      <p className="text-xs text-gray-600">
+                        After configuring your variants, click "Apply PreProduct Logic" to see how the 
+                        tags and statuses are applied. Pay attention to which conditions take precedence 
+                        when multiple conditions are present on a variant.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md mt-4">
+                    <h4 className="font-medium text-sm mb-1 flex items-center">
+                      <Lightbulb className="h-4 w-4 mr-2 text-amber-500" />
+                      Pro Tip
+                    </h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      You can export your simulator results to share with your team by taking 
+                      a screenshot of the product preview after processing. This helps document 
+                      test cases and expected behavior.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
 
         <ProductProvider>
@@ -138,6 +196,7 @@ const ProductSimulator = () => {
             </div>
             <div className="glass-effect rounded-xl p-2 shadow-lg animate-fade-in">
               <ProductPreview />
+              <ContextualHelp />
             </div>
           </div>
         </ProductProvider>
