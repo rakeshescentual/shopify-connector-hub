@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 type DiscontinuedValue = 'No' | 'By Manufacturer' | 'Delisted' | '';
@@ -15,9 +16,9 @@ export interface ProductVariant {
     auto_preproduct_preorder_backorder: 'yes' | 'no';
     auto_preproduct_preorder_notifyme: 'yes' | 'no';
     auto_preproduct_preorder_discontinued: 'yes' | 'no';
+    auto_preproduct_disablebutton: 'yes' | 'no';
     'custom.discontinued': DiscontinuedValue;
     'custom.ordering_min_qty': number;
-    auto_preproduct_disablebutton: 'yes' | 'no';
   };
   backorderWeeks: number;
 }
@@ -78,9 +79,9 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           auto_preproduct_preorder_backorder: 'no',
           auto_preproduct_preorder_notifyme: 'no',
           auto_preproduct_preorder_discontinued: 'no',
+          auto_preproduct_disablebutton: 'no',
           'custom.discontinued': 'No',
-          'custom.ordering_min_qty': 0,
-          auto_preproduct_disablebutton: 'no'
+          'custom.ordering_min_qty': 0
         },
         backorderWeeks: 0
       }
@@ -115,9 +116,9 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         auto_preproduct_preorder_backorder: 'no',
         auto_preproduct_preorder_notifyme: 'no',
         auto_preproduct_preorder_discontinued: 'no',
+        auto_preproduct_disablebutton: 'no',
         'custom.discontinued': 'No',
-        'custom.ordering_min_qty': 0,
-        auto_preproduct_disablebutton: 'no'
+        'custom.ordering_min_qty': 0
       },
       backorderWeeks: 0
     };
@@ -156,6 +157,9 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           }
         });
         
+        // Also reset the disablebutton metafield to "no"
+        metafields.auto_preproduct_disablebutton = 'no';
+        
         updatedVariant.metafields = metafields;
         return updatedVariant;
       });
@@ -166,14 +170,12 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         const metafields = {...updatedVariant.metafields};
         const discontinuedValue = metafields['custom.discontinued'];
         
-        // Set auto_preproduct_disablebutton to "no" by default
-        metafields.auto_preproduct_disablebutton = 'no';
-        
         // Check each condition independently for each variant
         
         // Check for discontinued items (highest priority)
         if (isDiscontinued(discontinuedValue)) {
           metafields.auto_preproduct_preorder_discontinued = 'yes';
+          // Set auto_preproduct_disablebutton to "yes" for discontinued items
           metafields.auto_preproduct_disablebutton = 'yes';
         }
         
