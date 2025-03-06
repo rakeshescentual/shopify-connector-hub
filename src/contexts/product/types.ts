@@ -47,4 +47,5 @@ export interface ProductContextType {
   applyPreProductLogic: () => void;
   updateVariant: () => void;
   handleVariantChange: (field: string, value: any) => void;
+  resetSimulator: () => void;
 }
