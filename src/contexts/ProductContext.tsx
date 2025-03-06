@@ -1,54 +1,11 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-
-type DiscontinuedValue = 'No' | 'By Manufacturer' | 'By Us' | 'Special Order' | 'Delisted' | '';
-
-export interface ProductVariant {
-  id: string;
-  title: string;
-  inventory: number;
-  hadStockBefore: boolean;
-  launchDate: string | null;
-  metafields: {
-    auto_preproduct_preorder: 'yes' | 'no';
-    auto_preproduct_preorder_launch: 'yes' | 'no';
-    auto_preproduct_preorder_specialorder: 'yes' | 'no';
-    auto_preproduct_preorder_backorder: 'yes' | 'no';
-    auto_preproduct_preorder_notifyme: 'yes' | 'no';
-    auto_preproduct_preorder_discontinued: 'yes' | 'no';
-    auto_preproduct_disablebutton: 'yes' | 'no';
-    'custom.discontinued': DiscontinuedValue;
-    'custom.ordering_min_qty': number;
-  };
-  backorderWeeks: number;
-}
-
-export interface Product {
-  id: string;
-  title: string;
-  variants: ProductVariant[];
-  tags: string[];
-  auto_quickbuydisable: 'yes' | 'no';
-}
-
-export type MetafieldKey = keyof ProductVariant['metafields'];
-
-interface ProductContextType {
-  product: Product;
-  setProduct: React.Dispatch<React.SetStateAction<Product>>;
-  selectedVariantId: string;
-  setSelectedVariantId: React.Dispatch<React.SetStateAction<string>>;
-  selectedVariant: ProductVariant;
-  isProcessing: boolean;
-  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
-  editableVariant: ProductVariant | null;
-  setEditableVariant: React.Dispatch<React.SetStateAction<ProductVariant | null>>;
-  showAdvanced: boolean;
-  setShowAdvanced: React.Dispatch<React.SetStateAction<boolean>>;
-  addVariant: () => void;
-  applyPreProductLogic: () => void;
-  updateVariant: () => void;
-  handleVariantChange: (field: string, value: any) => void;
-}
+import { toast } from '@/components/ui/use-toast';
+import { Product, ProductVariant, ProductContextType } from './product/types';
+import { initialProduct } from './product/initialState';
+import { createNewVariant, validateVariant } from './product/utils';
+import { applyPreProductLogic } from './product/preProductLogic';
+import { handleVariantChange as handleVariantChangeImpl } from './product/variantHandlers';
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
@@ -61,34 +18,6 @@ export const useProductContext = () => {
 };
 
 export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const initialProduct: Product = {
-    id: 'product1',
-    title: 'Sample Fragrance',
-    variants: [
-      {
-        id: 'variant1',
-        title: '50ml',
-        inventory: 10,
-        hadStockBefore: true,
-        launchDate: null,
-        metafields: {
-          auto_preproduct_preorder: 'no',
-          auto_preproduct_preorder_launch: 'no',
-          auto_preproduct_preorder_specialorder: 'no',
-          auto_preproduct_preorder_backorder: 'no',
-          auto_preproduct_preorder_notifyme: 'no',
-          auto_preproduct_preorder_discontinued: 'no',
-          auto_preproduct_disablebutton: 'no',
-          'custom.discontinued': 'No',
-          'custom.ordering_min_qty': 1
-        },
-        backorderWeeks: 0
-      }
-    ],
-    tags: [],
-    auto_quickbuydisable: 'no'
-  };
-
   const [product, setProduct] = useState<Product>(initialProduct);
   const [selectedVariantId, setSelectedVariantId] = useState(product.variants[0].id);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -102,25 +31,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [selectedVariantId]);
 
   const addVariant = () => {
-    const newVariant: ProductVariant = {
-      id: `variant${product.variants.length + 1}`,
-      title: `New Variant ${product.variants.length + 1}`,
-      inventory: 10,
-      hadStockBefore: false,
-      launchDate: null,
-      metafields: {
-        auto_preproduct_preorder: 'no',
-        auto_preproduct_preorder_launch: 'no',
-        auto_preproduct_preorder_specialorder: 'no',
-        auto_preproduct_preorder_backorder: 'no',
-        auto_preproduct_preorder_notifyme: 'no',
-        auto_preproduct_preorder_discontinued: 'no',
-        auto_preproduct_disablebutton: 'no',
-        'custom.discontinued': 'No',
-        'custom.ordering_min_qty': 1
-      },
-      backorderWeeks: 0
-    };
+    const newVariant = createNewVariant(product.variants.length);
     
     setProduct(prev => ({
       ...prev,
@@ -132,177 +43,6 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
       title: "Variant Added",
       description: `Added new variant: ${newVariant.title}`,
     });
-  };
-
-  const isDiscontinued = (discontinuedValue: DiscontinuedValue): boolean => {
-    return discontinuedValue === 'By Manufacturer' || discontinuedValue === 'Delisted';
-  };
-
-  const applyPreProductLogic = () => {
-    setIsProcessing(true);
-    
-    setTimeout(() => {
-      const updatedProduct = {...product};
-      
-      // Ensure all variants have correct default values for metafields
-      updatedProduct.variants = updatedProduct.variants.map(variant => {
-        const updatedVariant = {...variant};
-        const metafields = {...updatedVariant.metafields};
-        
-        // Validate and set defaults for custom.discontinued
-        if (!metafields['custom.discontinued']) {
-          metafields['custom.discontinued'] = 'No';
-        }
-        
-        // Validate and set defaults for custom.ordering_min_qty
-        if (metafields['custom.ordering_min_qty'] === undefined || metafields['custom.ordering_min_qty'] === null) {
-          metafields['custom.ordering_min_qty'] = 1;
-        }
-        
-        updatedVariant.metafields = metafields;
-        return updatedVariant;
-      });
-      
-      // Step 1: Reset all preproduct metafields
-      updatedProduct.variants = updatedProduct.variants.map(variant => {
-        const updatedVariant = {...variant};
-        const metafields = {...updatedVariant.metafields};
-        
-        // Reset all preproduct metafields to "no" first
-        Object.keys(metafields).forEach(key => {
-          if (key.startsWith('auto_preproduct_preorder') && key !== 'auto_preproduct_disablebutton') {
-            (metafields as any)[key] = 'no';
-          }
-        });
-        
-        // Also reset the disablebutton metafield to "no"
-        metafields.auto_preproduct_disablebutton = 'no';
-        
-        updatedVariant.metafields = metafields;
-        return updatedVariant;
-      });
-
-      // Step 2: Apply variant-specific logic for each variant independently
-      updatedProduct.variants = updatedProduct.variants.map(variant => {
-        const updatedVariant = {...variant};
-        const metafields = {...updatedVariant.metafields};
-        const discontinuedValue = metafields['custom.discontinued'];
-        
-        // Check each condition independently for each variant
-        
-        // Check for discontinued items (highest priority)
-        if (isDiscontinued(discontinuedValue) && updatedVariant.inventory <= 0) {
-          metafields.auto_preproduct_preorder_discontinued = 'yes';
-          // Set auto_preproduct_disablebutton to "yes" for discontinued items with no inventory
-          metafields.auto_preproduct_disablebutton = 'yes';
-        }
-        
-        // Check for launch dates
-        else if (updatedVariant.launchDate) {
-          const launchDate = new Date(updatedVariant.launchDate);
-          const currentDate = new Date();
-          
-          // Only set launch tag if the launch date is in the future
-          if (launchDate > currentDate) {
-            metafields.auto_preproduct_preorder_launch = 'yes';
-          }
-        }
-        
-        // Check for special order conditions
-        else if (
-          updatedVariant.inventory <= 0 && 
-          !isDiscontinued(discontinuedValue) &&
-          metafields['custom.ordering_min_qty'] === 1
-        ) {
-          metafields.auto_preproduct_preorder_specialorder = 'yes';
-        }
-        
-        // Check for notify me conditions (extended backorder)
-        // If the variant has been in backorder for 4 or more weeks
-        else if (
-          updatedVariant.inventory <= 0 && 
-          !isDiscontinued(discontinuedValue) &&
-          updatedVariant.backorderWeeks >= 4
-        ) {
-          metafields.auto_preproduct_preorder_notifyme = 'yes';
-        }
-        
-        // Check for backorder conditions
-        else if (
-          updatedVariant.inventory <= 0 && 
-          !isDiscontinued(discontinuedValue)
-        ) {
-          metafields.auto_preproduct_preorder_backorder = 'yes';
-        }
-        
-        // Apply preproduct_preorder according to refined logic
-        // Only if the variant has never had stock before
-        else if (
-          updatedVariant.inventory <= 0 && 
-          !updatedVariant.hadStockBefore
-        ) {
-          metafields.auto_preproduct_preorder = 'yes';
-        }
-        
-        updatedVariant.metafields = metafields;
-        return updatedVariant;
-      });
-      
-      // Step 3: Generate product tags based on variant metafields
-      // A tag should be applied if ANY variant has the corresponding metafield set to "yes"
-      const newTags: string[] = [];
-      const metafieldKeys = [
-        'auto_preproduct_preorder',
-        'auto_preproduct_preorder_launch',
-        'auto_preproduct_preorder_specialorder',
-        'auto_preproduct_preorder_backorder',
-        'auto_preproduct_preorder_notifyme',
-        'auto_preproduct_preorder_discontinued'
-      ];
-      
-      metafieldKeys.forEach(metafieldKey => {
-        const tagName = metafieldKey.replace('auto_', '');
-        const hasVariantWithMetafield = updatedProduct.variants.some(variant => 
-          variant.metafields[metafieldKey as keyof typeof variant.metafields] === 'yes'
-        );
-        
-        if (hasVariantWithMetafield) {
-          newTags.push(tagName);
-        }
-      });
-      
-      // Step 4: Update Quick Buy status based on variant conditions
-      const hasMultipleVariants = updatedProduct.variants.length > 1;
-      const hasOutOfStockVariant = updatedProduct.variants.some(v => v.inventory <= 0);
-      
-      // Check if any out-of-stock variant has any preproduct metafield set to "yes"
-      const hasOutOfStockVariantWithPreProduct = updatedProduct.variants.some(variant => 
-        variant.inventory <= 0 && 
-        Object.entries(variant.metafields)
-          .some(([key, value]) => 
-            key.startsWith('auto_preproduct_preorder') && 
-            key !== 'auto_preproduct_disablebutton' && 
-            value === 'yes'
-          )
-      );
-      
-      // Set auto_quickbuydisable to "yes" if:
-      // 1. The product has multiple variants AND
-      // 2. At least one variant is out of stock AND
-      // 3. That out-of-stock variant has a preproduct metafield set to "yes"
-      updatedProduct.auto_quickbuydisable = (hasMultipleVariants && hasOutOfStockVariantWithPreProduct) 
-        ? 'yes' 
-        : 'no';
-      
-      updatedProduct.tags = newTags;
-      setProduct(updatedProduct);
-      setIsProcessing(false);
-      
-      toast({
-        title: "PreProduct Logic Applied",
-        description: `Updated product with ${newTags.length} tags and processed ${updatedProduct.variants.length} variants.`,
-      });
-    }, 1000);
   };
 
   const updateVariant = () => {
@@ -319,20 +59,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
       editableVariant.metafields['custom.ordering_min_qty'] = 1;
     }
     
-    // Validate only one preproduct metafield is set to "yes" for this variant
-    const preproductMetafields = Object.entries(editableVariant.metafields)
-      .filter(([key, value]) => 
-        key.startsWith('auto_preproduct_preorder') && 
-        key !== 'auto_preproduct_disablebutton' && 
-        value === 'yes'
-      );
-    
-    if (preproductMetafields.length > 1) {
-      toast({
-        title: "Validation Error",
-        description: "Only one preproduct metafield can be set to 'yes' per variant at a time. Please fix and try again.",
-        variant: "destructive"
-      });
+    if (!validateVariant(editableVariant)) {
       return;
     }
     
@@ -348,68 +75,15 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
       description: `Updated variant: ${editableVariant.title}`,
     });
     
-    applyPreProductLogic();
+    applyPreProductLogicHandler();
+  };
+
+  const applyPreProductLogicHandler = () => {
+    applyPreProductLogic(product, setProduct, setIsProcessing);
   };
 
   const handleVariantChange = (field: string, value: any) => {
-    if (!editableVariant) return;
-    
-    if (field.startsWith('metafields.')) {
-      const metafieldKey = field.split('.')[1] as MetafieldKey;
-      
-      // If setting a preproduct metafield to "yes", ensure all others are "no" for THIS variant
-      if (
-        metafieldKey.startsWith('auto_preproduct_preorder') && 
-        metafieldKey !== 'auto_preproduct_disablebutton' && 
-        value === 'yes'
-      ) {
-        setEditableVariant(prev => {
-          if (!prev) return prev;
-          
-          const updatedMetafields = { ...prev.metafields };
-          
-          // Set all preproduct metafields to "no" first
-          Object.keys(updatedMetafields).forEach(key => {
-            if (key.startsWith('auto_preproduct_preorder') && key !== 'auto_preproduct_disablebutton') {
-              (updatedMetafields as any)[key] = 'no';
-            }
-          });
-          
-          // Then set the requested one to "yes"
-          (updatedMetafields as any)[metafieldKey] = 'yes';
-          
-          return {
-            ...prev,
-            metafields: updatedMetafields
-          };
-        });
-      } else {
-        setEditableVariant(prev => {
-          if (!prev) return prev;
-          
-          const updatedMetafields = { ...prev.metafields };
-          
-          if (metafieldKey === 'custom.ordering_min_qty') {
-            // Ensure value is at least 1
-            const parsedValue = typeof value === 'number' ? value : parseInt(value) || 1;
-            updatedMetafields['custom.ordering_min_qty'] = Math.max(1, parsedValue);
-          } else {
-            // Use type casting to handle the string conversion properly
-            (updatedMetafields as any)[metafieldKey] = String(value);
-          }
-          
-          return {
-            ...prev,
-            metafields: updatedMetafields
-          };
-        });
-      }
-    } else {
-      setEditableVariant(prev => {
-        if (!prev) return prev;
-        return { ...prev, [field]: value };
-      });
-    }
+    handleVariantChangeImpl(field, value, editableVariant, setEditableVariant);
   };
 
   const value = {
@@ -425,7 +99,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     showAdvanced,
     setShowAdvanced,
     addVariant,
-    applyPreProductLogic,
+    applyPreProductLogic: applyPreProductLogicHandler,
     updateVariant,
     handleVariantChange
   };
@@ -437,4 +111,5 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   );
 };
 
-import { toast } from '@/components/ui/use-toast';
+// Re-export types for ease of use
+export type { Product, ProductVariant, MetafieldKey } from './product/types';
