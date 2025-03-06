@@ -253,12 +253,12 @@ const ProductSimulator = () => {
         if (metafieldKey === 'custom.ordering_min_qty') {
           updatedMetafields['custom.ordering_min_qty'] = typeof value === 'number' ? value : parseInt(value) || 0;
         } else {
-          (updatedMetafields as any)[metafieldKey] = String(value);
+          (updatedMetafields as any)[metafieldKey as keyof typeof updatedMetafields] = String(value);
         }
         
         return {
           ...prev,
-          metafields: updatedMetafields as ProductVariant['metafields']
+          metafields: updatedMetafields
         };
       });
     } else {
