@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 export interface ProductVariant {
@@ -194,6 +195,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         if (
           updatedVariant.inventory <= 0 && 
           metafields['custom.discontinued'] !== 'By Manufacturer' && 
+          metafields['custom.discontinued'] !== 'Delisted' &&
           metafields['custom.ordering_min_qty'] === 1
         ) {
           metafields.auto_preproduct_preorder_specialorder = 'yes';
@@ -283,7 +285,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   const updateVariant = () => {
     if (!editableVariant) return;
     
-    // Before updating, ensure only one preproduct metafield is set to "yes"
+    // Validate only one preproduct metafield is set to "yes" for this variant
     const preproductMetafields = Object.entries(editableVariant.metafields)
       .filter(([key, value]) => 
         key.startsWith('auto_preproduct_preorder') && 
@@ -294,7 +296,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     if (preproductMetafields.length > 1) {
       toast({
         title: "Validation Error",
-        description: "Only one preproduct metafield can be set to 'yes' at a time. Please fix and try again.",
+        description: "Only one preproduct metafield can be set to 'yes' per variant at a time. Please fix and try again.",
         variant: "destructive"
       });
       return;
@@ -321,7 +323,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     if (field.startsWith('metafields.')) {
       const metafieldKey = field.split('.')[1] as MetafieldKey;
       
-      // If setting a preproduct metafield to "yes", ensure all others are "no"
+      // If setting a preproduct metafield to "yes", ensure all others are "no" for THIS variant
       if (
         metafieldKey.startsWith('auto_preproduct_preorder') && 
         metafieldKey !== 'auto_preproduct_disablebutton' && 

@@ -58,12 +58,12 @@ const VariantStatusCard: React.FC<VariantStatusCardProps> = ({ variant }) => {
     } else if (metafieldKey === 'auto_preproduct_preorder_launch') {
       buttonText = "Pre-Order";
       buttonIcon = <Calendar size={14} className="mr-1.5" />;
-    } else if (metafieldKey === 'auto_preproduct_preorder') {
-      buttonText = "Pre-Order";
-      buttonIcon = <Package size={14} className="mr-1.5" />;
     } else if (metafieldKey === 'auto_preproduct_preorder_specialorder') {
       buttonText = "Special Order";
       buttonIcon = <AlertCircle size={14} className="mr-1.5" />;
+    } else if (metafieldKey === 'auto_preproduct_preorder') {
+      buttonText = "Pre-Order";
+      buttonIcon = <Package size={14} className="mr-1.5" />;
     }
   }
   
