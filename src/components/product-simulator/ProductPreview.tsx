@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { AlertTriangle, Tag, ShoppingCart, RefreshCw } from 'lucide-react';
 import VariantStatusCard from './VariantStatusCard';
 import { useProductContext } from '@/contexts/ProductContext';
@@ -18,6 +19,11 @@ const ProductPreview = () => {
         <CardDescription>
           See how the product would appear with PreProduct integration
         </CardDescription>
+        {product.lastProcessed && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Last processed: {new Date(product.lastProcessed).toLocaleString()}
+          </p>
+        )}
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
@@ -70,20 +76,37 @@ const ProductPreview = () => {
         </div>
       </CardContent>
       <CardFooter>
-        <Button 
-          onClick={applyPreProductLogic} 
-          className="w-full" 
-          disabled={isProcessing}
-        >
-          {isProcessing ? (
-            <>
-              <RefreshCw size={16} className="mr-2 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            'Apply PreProduct Logic'
-          )}
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button 
+              className="w-full" 
+              disabled={isProcessing}
+            >
+              {isProcessing ? (
+                <>
+                  <RefreshCw size={16} className="mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                'Apply PreProduct Logic'
+              )}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Apply PreProduct Logic</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will process all variants according to the PreProduct business rules and update product tags and status. Continue?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={applyPreProductLogic} className="bg-primary text-primary-foreground">
+                Apply Logic
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardFooter>
     </Card>
   );

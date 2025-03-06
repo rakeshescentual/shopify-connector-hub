@@ -40,6 +40,8 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   const addVariant = useCallback(() => {
     try {
       const newVariant = createNewVariant(product.variants.length);
+      newVariant.status = 'pending'; // Mark as pending until processed
+      newVariant.lastUpdated = new Date().toISOString(); // Add creation timestamp
       
       setProduct(prev => ({
         ...prev,
@@ -89,6 +91,10 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         return;
       }
       
+      // Add lastUpdated timestamp and set status to pending
+      editableVariant.lastUpdated = new Date().toISOString();
+      editableVariant.status = 'pending';
+      
       // Check if the variant actually changed
       const originalVariant = product.variants.find(v => v.id === editableVariant.id);
       const hasChanged = JSON.stringify(originalVariant) !== JSON.stringify(editableVariant);
@@ -136,19 +142,16 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [editableVariant]);
 
   const resetSimulator = useCallback(() => {
-    // Ask for confirmation before resetting
-    if (window.confirm("Are you sure you want to reset the simulator? All changes will be lost.")) {
-      setProduct(initialProduct);
-      setSelectedVariantId(initialProduct.variants[0].id);
-      setIsProcessing(false);
-      setEditableVariant({...initialProduct.variants[0]});
-      setShowAdvanced(false);
-      
-      toast({
-        title: "Simulator Reset",
-        description: "All changes have been discarded.",
-      });
-    }
+    setProduct(initialProduct);
+    setSelectedVariantId(initialProduct.variants[0].id);
+    setIsProcessing(false);
+    setEditableVariant({...initialProduct.variants[0]});
+    setShowAdvanced(false);
+    
+    toast({
+      title: "Simulator Reset",
+      description: "All changes have been discarded.",
+    });
   }, []);
 
   // Memoize context value to prevent unnecessary re-renders

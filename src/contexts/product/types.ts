@@ -19,6 +19,8 @@ export interface ProductVariant {
     'custom.ordering_min_qty': number;
   };
   backorderWeeks: number;
+  status?: 'active' | 'inactive' | 'pending'; // Optional status field for UI display
+  lastUpdated?: string; // Track when the variant was last updated
 }
 
 export interface Product {
@@ -27,6 +29,7 @@ export interface Product {
   variants: ProductVariant[];
   tags: string[];
   auto_quickbuydisable: 'yes' | 'no';
+  lastProcessed?: string; // Track when PreProduct logic was last applied
 }
 
 export type MetafieldKey = keyof ProductVariant['metafields'];

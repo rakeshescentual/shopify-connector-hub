@@ -2,18 +2,14 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Package, Plus, RefreshCw, RotateCcw } from 'lucide-react';
+import { Package, RefreshCw, RotateCcw } from 'lucide-react';
 import VariantFormTabs from './VariantFormTabs';
+import VariantSelector from './VariantSelector';
 import { useProductContext } from '@/contexts/ProductContext';
 
 const ProductForm = () => {
   const { 
-    product, 
-    selectedVariantId, 
-    setSelectedVariantId, 
-    addVariant, 
     updateVariant,
     resetSimulator
   } = useProductContext();
@@ -30,29 +26,7 @@ const ProductForm = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex gap-4 mb-6">
-          <div className="w-3/4">
-            <Select value={selectedVariantId} onValueChange={setSelectedVariantId}>
-              <SelectTrigger className="bg-background/80 backdrop-blur-sm border-primary/20">
-                <SelectValue placeholder="Select variant" />
-              </SelectTrigger>
-              <SelectContent>
-                {product.variants.map(variant => (
-                  <SelectItem key={variant.id} value={variant.id}>
-                    {variant.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button 
-            variant="outline" 
-            className="w-1/4 bg-background/80 backdrop-blur-sm border-primary/20 hover:bg-primary/10" 
-            onClick={addVariant}
-          >
-            <Plus className="h-4 w-4 mr-1" /> Add
-          </Button>
-        </div>
+        <VariantSelector />
 
         <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 shadow-sm">
           <VariantFormTabs />
