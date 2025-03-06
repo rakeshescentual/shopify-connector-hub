@@ -3,8 +3,10 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ProductSimulator from '@/components/ProductSimulator';
-import { Cpu, Info } from 'lucide-react';
+import { Cpu, Info, FileText, ArrowRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Simulator = () => {
   return (
@@ -39,6 +41,60 @@ const Simulator = () => {
                   Start by modifying a variant or creating a new one, then click "Apply PreProduct Logic" to see the results.
                 </p>
               </div>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-3 items-center">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-xs flex items-center gap-1 bg-primary/5"
+                asChild
+              >
+                <a href="#tutorial">
+                  <FileText className="h-3 w-3" />
+                  View Documentation
+                  <ArrowRight className="h-3 w-3 ml-1" />
+                </a>
+              </Button>
+
+              <Tabs defaultValue="overview" className="w-full mt-4">
+                <TabsList className="grid w-full grid-cols-3 md:w-auto">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="status-guide">Status Guide</TabsTrigger>
+                  <TabsTrigger value="examples">Examples</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="overview" className="p-3 text-xs bg-card/50 rounded-md mt-2">
+                  <h3 className="font-medium mb-1">How PreProduct Logic Works</h3>
+                  <p className="text-muted-foreground">
+                    The PreProduct app analyzes your product variants and applies specific tags based on inventory,
+                    discontinued status, launch dates, and other factors. These tags control how products appear on
+                    your storefront.
+                  </p>
+                </TabsContent>
+                
+                <TabsContent value="status-guide" className="p-3 text-xs bg-card/50 rounded-md mt-2">
+                  <h3 className="font-medium mb-1">Status Priority Order</h3>
+                  <ol className="list-decimal pl-4 text-muted-foreground space-y-1">
+                    <li>Discontinued (highest priority)</li>
+                    <li>Launch Date (pre-orders)</li>
+                    <li>Notify Me (backorder &gt;= 4 weeks)</li>
+                    <li>Special Order (minimum qty = 1)</li>
+                    <li>Backorder (temporary out of stock)</li>
+                    <li>Pre-Order (never had stock before)</li>
+                  </ol>
+                </TabsContent>
+                
+                <TabsContent value="examples" className="p-3 text-xs bg-card/50 rounded-md mt-2">
+                  <h3 className="font-medium mb-1">Common Test Scenarios</h3>
+                  <ul className="list-disc pl-4 text-muted-foreground space-y-1">
+                    <li>Out of stock discontinued item: Displays "Discontinued"</li>
+                    <li>Future launch date: Displays "Pre-Order" with launch date</li>
+                    <li>Extended backorder (4+ weeks): Displays "Notify Me"</li>
+                    <li>Mixed inventory variants: May disable quick buy</li>
+                  </ul>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
           
