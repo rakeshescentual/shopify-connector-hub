@@ -41,6 +41,9 @@ interface Product {
   auto_quickbuydisable: 'yes' | 'no';
 }
 
+// Create a type that represents all possible metafield keys
+type MetafieldKey = keyof ProductVariant['metafields'];
+
 const ProductSimulator = () => {
   // Sample initial product
   const initialProduct: Product = {
@@ -268,7 +271,7 @@ const ProductSimulator = () => {
     if (!editableVariant) return;
     
     if (field.startsWith('metafields.')) {
-      const metafieldKey = field.split('.')[1];
+      const metafieldKey = field.split('.')[1] as MetafieldKey;
       setEditableVariant(prev => {
         if (!prev) return prev;
         
@@ -277,8 +280,16 @@ const ProductSimulator = () => {
         if (metafieldKey === 'custom.ordering_min_qty') {
           updatedMetafields[metafieldKey] = typeof value === 'number' ? value : parseInt(value) || 0;
         } else {
-          // Use type assertion to tell TypeScript this is safe
-          (updatedMetafields as Record<string, string | number>)[metafieldKey] = value;
+          // Create a new object with the appropriate type to avoid type errors
+          const newMetafields = {
+            ...updatedMetafields,
+            [metafieldKey]: value
+          };
+          
+          return {
+            ...prev,
+            metafields: newMetafields as ProductVariant['metafields']
+          };
         }
         
         return {
