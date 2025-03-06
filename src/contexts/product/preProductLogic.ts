@@ -112,6 +112,8 @@ const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: Pro
   }
   
   // Priority 3: Check for notify me conditions (extended backorder)
+  // For notifyme, we reset the 4-week timer if item comes back in stock then goes out again
+  // This means we only apply the tag if the current inventory is <= 0 AND backorderWeeks >= 4
   if (variant.inventory <= 0 && 
       discontinuedValue !== 'By Manufacturer' &&
       variant.backorderWeeks >= 4) {
