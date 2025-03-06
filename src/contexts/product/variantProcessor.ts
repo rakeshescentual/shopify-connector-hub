@@ -22,7 +22,7 @@ export const processVariant = (variant: ProductVariant): ProductVariant => {
       // Reset all preproduct metafields to "no" first
       resetVariantPreProductMetafields(metafields);
       
-      // Set discontinued metafield to "yes" if it's "By Manufacturer" or "Delisted"
+      // Set discontinued metafield to "yes" if it's discontinued
       metafields.auto_preproduct_preorder_discontinued = 'yes';
       
       // Set the disable button to "yes" for both delisted and by manufacturer cases
@@ -122,16 +122,14 @@ export const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafiel
   // Priority 3: Check for notify me conditions (extended backorder)
   // For notifyme, we reset the 4-week timer if item comes back in stock then goes out again
   // This means we only apply the tag if the current inventory is <= 0 AND backorderWeeks >= 4
-  if (variant.inventory <= 0 && 
-      variant.backorderWeeks >= 4) {
+  if (variant.inventory <= 0 && variant.backorderWeeks >= 4) {
     metafields.auto_preproduct_preorder_notifyme = 'yes';
     return;
   }
   
   // Priority 4: Check for special order conditions
   // Must be out of stock (inventory <= 0) and have min qty of 1
-  if (variant.inventory <= 0 && 
-      metafields['custom.ordering_min_qty'] === 1) {
+  if (variant.inventory <= 0 && metafields['custom.ordering_min_qty'] === 1) {
     metafields.auto_preproduct_preorder_specialorder = 'yes';
     return;
   }

@@ -1,4 +1,3 @@
-
 import { Product, ProductVariant } from './types';
 import { toast } from '@/components/ui/use-toast';
 import { processVariant } from './variantProcessor';
@@ -29,6 +28,7 @@ export const applyPreProductLogic = (
       // Process each variant according to business rules
       const processedVariants: ProductVariant[] = [];
       let variantsUpdated = 0;
+      let variantsWithErrors = 0;
       
       // Process variants in batches to improve performance with large variant sets
       for (const variant of updatedProduct.variants) {
@@ -41,6 +41,15 @@ export const applyPreProductLogic = (
           processed.lastUpdated = new Date().toISOString();
           processed.status = 'active'; // Mark as active after processing
           
+          // Track processing history
+          processed.processingHistory = processed.processingHistory || [];
+          processed.processingHistory.push(`Processed at ${new Date().toLocaleTimeString()}`);
+          
+          // Keep history to the last 10 entries
+          if (processed.processingHistory.length > 10) {
+            processed.processingHistory = processed.processingHistory.slice(-10);
+          }
+          
           // Check what changed
           const changedMetafields = Object.keys(processed.metafields).filter(key => 
             processed.metafields[key as keyof typeof processed.metafields] !== 
@@ -48,20 +57,54 @@ export const applyPreProductLogic = (
           );
           
           if (changedMetafields.length > 0) {
-            processingLog.push(`  Updated metafields: ${changedMetafields.join(', ')}`);
+            const changeLog = `  Updated metafields: ${changedMetafields.join(', ')}`;
+            processingLog.push(changeLog);
+            
+            // Add more detailed status message
+            let statusMessage = "Processing complete: ";
+            if (changedMetafields.some(field => field.includes('discontinued'))) {
+              statusMessage += "Discontinued status applied. ";
+            } else if (changedMetafields.some(field => field.includes('launch'))) {
+              statusMessage += "Launch pre-order status applied. ";
+            } else if (changedMetafields.some(field => field.includes('notifyme'))) {
+              statusMessage += "Notify Me status applied due to extended backorder. ";
+            } else if (changedMetafields.some(field => field.includes('specialorder'))) {
+              statusMessage += "Special Order status applied. ";
+            } else if (changedMetafields.some(field => field.includes('backorder'))) {
+              statusMessage += "Backorder status applied. ";
+            } else if (changedMetafields.some(field => field === 'auto_preproduct_preorder')) {
+              statusMessage += "Pre-Order status applied. ";
+            }
+            
+            processed.statusMessage = statusMessage;
           } else {
             processingLog.push(`  No metafield changes needed`);
+            processed.statusMessage = "Processing complete: No changes needed";
           }
           
           processedVariants.push(processed);
           variantsUpdated++;
         } catch (variantError) {
           console.error(`Error processing variant ${variant.id}:`, variantError);
-          processingLog.push(`  ERROR processing ${variant.title}: ${variantError instanceof Error ? variantError.message : String(variantError)}`);
+          const errorMessage = `ERROR processing ${variant.title}: ${variantError instanceof Error ? variantError.message : String(variantError)}`;
+          processingLog.push(`  ${errorMessage}`);
           
           // Continue processing other variants even if one fails
-          variant.status = 'inactive'; // Mark as inactive due to processing error
+          variant.status = 'error'; // Mark as error due to processing error
+          variant.statusMessage = errorMessage;
+          variant.lastUpdated = new Date().toISOString();
+          
+          // Track the error in processing history
+          variant.processingHistory = variant.processingHistory || [];
+          variant.processingHistory.push(`Error at ${new Date().toLocaleTimeString()}: ${variantError instanceof Error ? variantError.message : String(variantError)}`);
+          
+          // Keep history to the last 10 entries
+          if (variant.processingHistory.length > 10) {
+            variant.processingHistory = variant.processingHistory.slice(-10);
+          }
+          
           processedVariants.push(variant);
+          variantsWithErrors++;
           
           toast({
             title: "Warning",
@@ -88,13 +131,25 @@ export const applyPreProductLogic = (
         processingLog.push(`  Quick Buy status changed to: ${updatedProduct.auto_quickbuydisable}`);
       }
       
+      // Store the processing log in the product
+      updatedProduct.processingLog = processingLog;
+      
       console.log('PreProduct Processing Log:', processingLog);
       setProduct(updatedProduct);
       
-      toast({
-        title: "PreProduct Logic Applied",
-        description: `Updated product with ${updatedProduct.tags.length} tags and processed ${variantsUpdated} variants.`,
-      });
+      // Show appropriate toast based on results
+      if (variantsWithErrors > 0) {
+        toast({
+          title: "PreProduct Logic Applied With Warnings",
+          description: `Updated ${variantsUpdated - variantsWithErrors} variants successfully. ${variantsWithErrors} variants had errors.`,
+          variant: "warning"
+        });
+      } else {
+        toast({
+          title: "PreProduct Logic Applied",
+          description: `Updated product with ${updatedProduct.tags.length} tags and processed ${variantsUpdated} variants.`,
+        });
+      }
     } catch (error) {
       console.error("Error applying PreProduct logic:", error);
       toast({

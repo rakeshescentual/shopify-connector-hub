@@ -23,14 +23,39 @@ export const handleVariantChange = (
       // Ensure inventory is always a number
       const numValue = typeof value === 'number' ? value : parseInt(value) || 0;
       updateVariantField(editableVariant, setEditableVariant, field, numValue);
+      
+      // Add status message about inventory change
+      updateVariantField(editableVariant, setEditableVariant, 'statusMessage', 
+        `Inventory updated to ${numValue}. This may affect product availability status.`);
     } else if (field === 'backorderWeeks') {
       // Ensure backorderWeeks is always a non-negative number
       const numValue = typeof value === 'number' ? value : parseInt(value) || 0;
-      updateVariantField(editableVariant, setEditableVariant, field, Math.max(0, numValue));
+      const validValue = Math.max(0, numValue);
+      updateVariantField(editableVariant, setEditableVariant, field, validValue);
+      
+      // Add note about backorder weeks impact
+      if (validValue >= 4) {
+        updateVariantField(editableVariant, setEditableVariant, 'statusMessage', 
+          `Backorder set to ${validValue} weeks. Products with 4+ weeks may trigger "Notify Me" status.`);
+      }
     } else {
       // Handle regular field changes
       updateVariantField(editableVariant, setEditableVariant, field, value);
     }
+    
+    // Track history of changes
+    const timestamp = new Date().toLocaleTimeString();
+    const changeLog = `${timestamp}: Changed ${field} to ${value}`;
+    
+    setEditableVariant(prev => {
+      if (!prev) return prev;
+      const history = prev.processingHistory || [];
+      return {
+        ...prev,
+        processingHistory: [...history, changeLog].slice(-10) // Keep last 10 entries
+      };
+    });
+    
   } catch (error) {
     console.error('Error handling variant change:', error);
     toast({
@@ -88,9 +113,13 @@ const handleMetafieldChange = (
       // Then set the requested one to "yes"
       (updatedMetafields as any)[metafieldKey] = 'yes';
       
+      // Update status message
+      const statusMessage = `Manual override: ${metafieldKey.replace('auto_preproduct_', '')} set to "yes"`;
+      
       return {
         ...prev,
-        metafields: updatedMetafields
+        metafields: updatedMetafields,
+        statusMessage: statusMessage
       };
     });
   } else if (metafieldKey === 'custom.ordering_min_qty') {
@@ -104,7 +133,31 @@ const handleMetafieldChange = (
       
       return {
         ...prev,
-        metafields: updatedMetafields
+        metafields: updatedMetafields,
+        statusMessage: `Minimum order quantity set to ${Math.max(1, parsedValue)}`
+      };
+    });
+  } else if (metafieldKey === 'custom.discontinued') {
+    // Handle discontinued status changes
+    setEditableVariant(prev => {
+      if (!prev) return prev;
+      
+      const updatedMetafields = { ...prev.metafields };
+      (updatedMetafields as any)[metafieldKey] = value;
+      
+      let statusMessage = '';
+      if (value === 'By Manufacturer' || value === 'Delisted') {
+        statusMessage = `Variant marked as discontinued (${value}). This will disable purchasing when out of stock.`;
+      } else if (value === 'No') {
+        statusMessage = 'Discontinued status removed. Normal availability rules will apply.';
+      } else {
+        statusMessage = `Discontinued status set to "${value}"`;
+      }
+      
+      return {
+        ...prev,
+        metafields: updatedMetafields,
+        statusMessage: statusMessage
       };
     });
   } else {

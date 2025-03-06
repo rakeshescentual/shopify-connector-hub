@@ -19,8 +19,10 @@ export interface ProductVariant {
     'custom.ordering_min_qty': number;
   };
   backorderWeeks: number;
-  status?: 'active' | 'inactive' | 'pending'; // Optional status field for UI display
+  status?: 'active' | 'inactive' | 'pending' | 'error'; // Added 'error' status for better error handling
+  statusMessage?: string; // Add a field to store detailed status messages
   lastUpdated?: string; // Track when the variant was last updated
+  processingHistory?: string[]; // Track the processing history for debugging
 }
 
 export interface Product {
@@ -30,6 +32,7 @@ export interface Product {
   tags: string[];
   auto_quickbuydisable: 'yes' | 'no';
   lastProcessed?: string; // Track when PreProduct logic was last applied
+  processingLog?: string[]; // Store processing log for the entire product
 }
 
 export type MetafieldKey = keyof ProductVariant['metafields'];

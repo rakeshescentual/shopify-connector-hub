@@ -3,7 +3,23 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ProductVariant } from '@/contexts/ProductContext';
-import { Clock, AlertCircle, Bell, Ban, Package, Calendar } from 'lucide-react';
+import { 
+  Clock, 
+  AlertCircle, 
+  Bell, 
+  Ban, 
+  Package, 
+  Calendar, 
+  Info,
+  History
+} from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { format } from 'date-fns';
 
 interface VariantStatusCardProps {
   variant: ProductVariant;
@@ -84,44 +100,121 @@ const VariantStatusCard: React.FC<VariantStatusCardProps> = ({ variant }) => {
       default: return '';
     }
   };
+  
+  // Format the last updated date if available
+  const formattedLastUpdated = variant.lastUpdated 
+    ? format(new Date(variant.lastUpdated), 'MMM d, yyyy h:mm a')
+    : 'Not processed yet';
     
   return (
-    <div className="p-3 border rounded-md flex items-center justify-between">
-      <div>
-        <p className="font-medium">{variant.title}</p>
-        <div className="flex items-center gap-2 mt-1">
-          {isOutOfStock ? (
-            <Badge variant="outline" className="text-red-500 border-red-200">
-              Out of Stock
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="text-green-500 border-green-200">
-              In Stock ({variant.inventory})
-            </Badge>
-          )}
-          
-          {activeMetafield && (
-            <Badge className={getBadgeClass(activeMetafield[0])}>
-              {getStatusDisplayName(activeMetafield[0])}
-            </Badge>
-          )}
-          
-          {isDiscontinued && (
-            <Badge variant="destructive">
-              Discontinued
-            </Badge>
-          )}
+    <div className="p-3 border rounded-md space-y-2">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="font-medium">{variant.title}</p>
+          <div className="flex items-center gap-2 mt-1">
+            {isOutOfStock ? (
+              <Badge variant="outline" className="text-red-500 border-red-200">
+                Out of Stock
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-green-500 border-green-200">
+                In Stock ({variant.inventory})
+              </Badge>
+            )}
+            
+            {activeMetafield && (
+              <Badge className={getBadgeClass(activeMetafield[0])}>
+                {getStatusDisplayName(activeMetafield[0])}
+              </Badge>
+            )}
+            
+            {isDiscontinued && (
+              <Badge variant="destructive">
+                Discontinued
+              </Badge>
+            )}
+            
+            {variant.status === 'pending' && (
+              <Badge variant="outline" className="text-amber-500 border-amber-200">
+                Pending
+              </Badge>
+            )}
+            
+            {variant.status === 'error' && (
+              <Badge variant="destructive">
+                Error
+              </Badge>
+            )}
+          </div>
         </div>
+        <Button 
+          disabled={disableButton} 
+          variant={disableButton ? "outline" : "default"}
+          size="sm"
+          className={activeMetafield ? getBadgeClass(activeMetafield[0]) : undefined}
+        >
+          {buttonIcon}
+          {buttonText}
+        </Button>
       </div>
-      <Button 
-        disabled={disableButton} 
-        variant={disableButton ? "outline" : "default"}
-        size="sm"
-        className={activeMetafield ? getBadgeClass(activeMetafield[0]) : undefined}
-      >
-        {buttonIcon}
-        {buttonText}
-      </Button>
+      
+      {/* Status message and last updated info */}
+      {(variant.statusMessage || variant.lastUpdated) && (
+        <div className="text-xs text-gray-500 flex items-start gap-1.5 mt-1">
+          <Info size={12} className="mt-0.5 flex-shrink-0" />
+          <div>
+            {variant.statusMessage && <p>{variant.statusMessage}</p>}
+            {variant.lastUpdated && (
+              <p className="mt-0.5 flex items-center gap-1">
+                <History size={10} />
+                Last updated: {formattedLastUpdated}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Show backorder weeks if applicable */}
+      {variant.backorderWeeks > 0 && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center text-xs text-amber-600 mt-1 cursor-help">
+                <Clock size={12} className="mr-1" />
+                {variant.backorderWeeks} week{variant.backorderWeeks !== 1 ? 's' : ''} backorder
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">
+                {variant.backorderWeeks >= 4 
+                  ? "Extended backorder (4+ weeks) triggers 'Notify Me' status" 
+                  : "Standard backorder period"}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      
+      {/* Show launch date if set */}
+      {variant.launchDate && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center text-xs text-blue-600 mt-1 cursor-help">
+                <Calendar size={12} className="mr-1" />
+                Launch: {format(new Date(variant.launchDate), 'MMM d, yyyy')}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">
+                {new Date(variant.launchDate) > new Date() 
+                  ? "Future launch date triggers 'Pre-Order' status" 
+                  : "Launch date has passed"}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
     </div>
   );
 };
