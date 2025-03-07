@@ -8,7 +8,7 @@ import ConfigSection from '@/components/ConfigSection';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { BookOpen, Play, FileText } from 'lucide-react';
+import { BookOpen, Play, FileText, Server } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -43,6 +43,12 @@ const Index = () => {
                 <FileText size={18} />
                 Developer Docs
               </Link>
+            </Button>
+            <Button asChild size="lg" variant="default" className="gap-2 bg-emerald-600 hover:bg-emerald-700">
+              <a href="https://docs.gadget.dev/" target="_blank" rel="noopener noreferrer">
+                <Server size={18} />
+                Gadget.dev Docs
+              </a>
             </Button>
           </div>
         </div>

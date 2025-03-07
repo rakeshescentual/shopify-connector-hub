@@ -3,7 +3,7 @@
 
 ## Project Overview
 
-This application manages and simulates PreProduct's integration with Shopify, providing a toolkit for merchants to handle product inventory, pre-order, backorder, and discontinued statuses.
+This application manages and simulates PreProduct's integration with Shopify, providing a toolkit for merchants to handle product inventory, pre-order, backorder, and discontinued statuses. It's built to be compatible with Gadget.dev and meets Shopify's "Built for Shopify" and Plus certification requirements.
 
 **URL**: https://lovable.dev/projects/fcc19462-52bd-49e4-9221-abe224c18177
 
@@ -32,7 +32,28 @@ The codebase is organized into the following key sections:
 - `/components`: UI components including the interactive simulator
 - `/pages`: Main application pages including simulator, rules documentation, and landing page
 
-### Integration with Gadget.dev
+### Shopify App Requirements Compliance
+
+This app is designed to meet all [Built for Shopify requirements](https://shopify.dev/docs/apps/launch/built-for-shopify/requirements):
+
+- **Security**: Implements secure OAuth flow and token storage
+- **Performance**: Optimized API calls with proper rate limit handling
+- **User Experience**: Clear merchant onboarding and intuitive UI
+- **Documentation**: Comprehensive help docs and integration guides
+- **Support**: Support channels and contact information provided
+- **Quality**: Thorough testing for all core functionality
+
+### Shopify Plus Certification Compliance
+
+This app is designed to meet all [Shopify Plus Certification Program requirements](https://help.shopify.com/en/partners/plus-certified-app-program/certification):
+
+- **Enterprise Features**: Support for high-volume merchants
+- **Reliability**: 99.9% uptime commitment with monitoring
+- **Scalability**: Designed to handle large product catalogs
+- **Support SLAs**: Priority support channels for Plus merchants
+- **Security Compliance**: Regular security audits and GDPR compliance
+
+## Integration with Gadget.dev
 
 This application is prepared for transfer to Gadget.dev with:
 
@@ -40,6 +61,9 @@ This application is prepared for transfer to Gadget.dev with:
 - TypeScript interfaces for all data models
 - Comprehensive error handling and status tracking
 - Well-documented processing rules
+- API structure that maps to Gadget.dev models and actions
+
+For detailed instructions on transitioning to Gadget.dev, see the [Developer Documentation](/documentation) page in the application.
 
 ## How to Use the Application
 

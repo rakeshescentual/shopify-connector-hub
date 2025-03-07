@@ -1,204 +1,257 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Steps, Step } from '@/components/ui/steps';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Download, ExternalLink } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { AlertCircle, Check, Code, ExternalLink } from 'lucide-react';
 
 const GadgetTransferGuide = () => {
   return (
-    <section className="py-12 bg-gradient-to-b from-primary/5 to-background">
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <Badge variant="outline" className="mb-4">Transfer Guide</Badge>
-            <h2 className="text-3xl font-bold mb-4">Migrating to Gadget.dev</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Follow this step-by-step guide to transfer the PreProduct application to the Gadget.dev platform
-            </p>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Gadget.dev Migration Guide</CardTitle>
+              <CardDescription>
+                Complete guide for transferring this application to Gadget.dev
+              </CardDescription>
+            </div>
+            <Badge variant="outline" className="flex items-center gap-1">
+              <Code size={12} />
+              Gadget.dev Ready
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Migration Preparation</AlertTitle>
+            <AlertDescription>
+              This application is architected to be Gadget.dev compatible. Follow these steps for a smooth migration.
+            </AlertDescription>
+          </Alert>
+
+          <div>
+            <h3 className="text-lg font-medium mb-4">Migration Steps</h3>
+            
+            <div className="space-y-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  1
+                </div>
+                <div>
+                  <h4 className="font-medium text-base">Create Gadget Project</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Create a new Gadget.dev project and connect it to your Shopify store.
+                  </p>
+                  <div className="mt-2 bg-muted p-3 rounded-md">
+                    <ol className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
+                      <li>Sign in to Gadget.dev and create a new project</li>
+                      <li>Select "Shopify" as your app type</li>
+                      <li>Configure your app name and settings</li>
+                      <li>Install the Shopify connection</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <div className="flex-shrink-0 bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  2
+                </div>
+                <div>
+                  <h4 className="font-medium text-base">Create Data Models</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Set up the core data models in Gadget based on our TypeScript interfaces.
+                  </p>
+                  <div className="mt-2 bg-muted p-3 rounded-md">
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Create the following models in Gadget.dev:
+                    </p>
+                    <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
+                      <li>
+                        <span className="font-medium">Product</span> - with the standard Shopify fields plus
+                        custom fields for PreProduct status
+                      </li>
+                      <li>
+                        <span className="font-medium">ProductVariant</span> - with additional fields for discontinued, 
+                        launchDate, backorderDelay, status
+                      </li>
+                      <li>
+                        <span className="font-medium">StoreConnection</span> - for storing connection settings
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <div className="flex-shrink-0 bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  3
+                </div>
+                <div>
+                  <h4 className="font-medium text-base">Implement Core Logic</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Port the processing logic into Gadget actions and effects.
+                  </p>
+                  <div className="mt-2 bg-muted p-3 rounded-md">
+                    <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
+                      <li>
+                        Create a <code>processVariant</code> action on the ProductVariant model
+                        that implements the logic from <code>variantProcessor.ts</code>
+                      </li>
+                      <li>
+                        Create a <code>applyPreProductLogic</code> action on the Product model
+                        that implements the logic from <code>preProductLogic.ts</code>
+                      </li>
+                      <li>
+                        Set up an Effect that runs whenever product inventory changes to
+                        automatically update the PreProduct status
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="border border-green-100 bg-green-50 rounded-md p-2 mt-3 flex items-start">
+                    <Check className="text-green-600 h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-green-800">
+                      The processing logic in this app is already structured to be easily ported
+                      to Gadget actions with minimal changes needed.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <div className="flex-shrink-0 bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  4
+                </div>
+                <div>
+                  <h4 className="font-medium text-base">Set Up API Endpoints</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Create Gadget API endpoints that match the simulation application.
+                  </p>
+                  <div className="mt-2 bg-muted p-3 rounded-md">
+                    <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
+                      <li>
+                        Configure Gadget's built-in RESTful API for Product and ProductVariant models
+                      </li>
+                      <li>
+                        Create a custom API route for <code>/shopify/connect</code> that handles store connections
+                      </li>
+                      <li>
+                        Create a custom API route for <code>/shopify/sync</code> that triggers product synchronization
+                      </li>
+                      <li>
+                        Set up appropriate authentication and rate limiting for all endpoints
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <div className="flex-shrink-0 bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  5
+                </div>
+                <div>
+                  <h4 className="font-medium text-base">Frontend Integration</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Update the frontend to use the Gadget API endpoints.
+                  </p>
+                  <div className="mt-2 bg-muted p-3 rounded-md">
+                    <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
+                      <li>
+                        Use Gadget's JavaScript client in the frontend application
+                      </li>
+                      <li>
+                        Update API call paths in the simulator to point to your Gadget app
+                      </li>
+                      <li>
+                        Implement OAuth flow for merchant installation using Gadget's built-in auth
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      <a 
+                        href="https://docs.gadget.dev/guides/using-gadget-with-react" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1"
+                      >
+                        Gadget React Guide <ExternalLink size={12} />
+                      </a>
+                    </Badge>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      <a 
+                        href="https://docs.gadget.dev/api/client" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1"
+                      >
+                        Gadget JS Client <ExternalLink size={12} />
+                      </a>
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           
-          <Card>
-            <CardHeader>
-              <CardTitle>Migration Process</CardTitle>
-              <CardDescription>
-                Complete these steps to successfully transfer the application
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-10">
-                <Step number={1} title="Export Data Models">
-                  <p className="text-muted-foreground mb-4">
-                    Begin by exporting the TypeScript interfaces that define the data models used in PreProduct.
-                  </p>
-                  <div className="flex flex-col gap-2 mb-4">
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                      <p className="text-sm">Export <code>Product</code> interface from <code>src/contexts/product/types.ts</code></p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                      <p className="text-sm">Export <code>ProductVariant</code> interface from <code>src/contexts/product/types.ts</code></p>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2">
-                    <Download className="h-4 w-4" />
-                    Download Data Models
-                  </Button>
-                </Step>
-                
-                <Step number={2} title="Create Gadget.dev Models">
-                  <p className="text-muted-foreground mb-4">
-                    Create the corresponding models in Gadget.dev's data modeling interface.
-                  </p>
-                  <div className="p-4 bg-muted rounded-md mb-4">
-                    <h4 className="font-medium mb-2 text-sm">Key Fields to Include:</h4>
-                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                      <li>All product fields (id, title, tags, etc.)</li>
-                      <li>All variant fields (id, title, inventory, etc.)</li>
-                      <li>All metafields with their exact names</li>
-                      <li>Processing status and history fields</li>
-                    </ul>
-                  </div>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
-                    <a href="https://gadget.dev/docs/modeling" target="_blank" rel="noopener noreferrer">
-                      View Gadget.dev Modeling Guide
-                      <ExternalLink className="h-3 w-3 ml-1" />
-                    </a>
-                  </Button>
-                </Step>
-                
-                <Step number={3} title="Implement Business Logic">
-                  <p className="text-muted-foreground mb-4">
-                    Transfer the core processing logic to Gadget.dev actions.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div className="p-3 border rounded-md">
-                      <h4 className="font-medium text-sm mb-1">Source Files</h4>
-                      <ul className="text-xs text-muted-foreground space-y-1">
-                        <li>src/contexts/product/variantProcessor.ts</li>
-                        <li>src/contexts/product/productProcessors.ts</li>
-                        <li>src/contexts/product/preProductLogic.ts</li>
-                      </ul>
-                    </div>
-                    <div className="p-3 border rounded-md">
-                      <h4 className="font-medium text-sm mb-1">Gadget.dev Actions</h4>
-                      <ul className="text-xs text-muted-foreground space-y-1">
-                        <li>processProductVariant</li>
-                        <li>updateProductTags</li>
-                        <li>applyPreProductLogic</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
-                    <a href="https://gadget.dev/docs/actions" target="_blank" rel="noopener noreferrer">
-                      View Gadget.dev Actions Guide
-                      <ExternalLink className="h-3 w-3 ml-1" />
-                    </a>
-                  </Button>
-                </Step>
-                
-                <Step number={4} title="Configure Shopify Integration">
-                  <p className="text-muted-foreground mb-4">
-                    Set up the Shopify connection in Gadget.dev to sync product data.
-                  </p>
-                  <div className="p-4 bg-muted rounded-md mb-4">
-                    <h4 className="font-medium mb-2 text-sm">Required Permissions:</h4>
-                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                      <li>Read products</li>
-                      <li>Write products</li>
-                      <li>Read inventory</li>
-                      <li>Write inventory</li>
-                      <li>Read/write product metafields</li>
-                    </ul>
-                  </div>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
-                    <a href="https://gadget.dev/docs/connections/shopify" target="_blank" rel="noopener noreferrer">
-                      View Shopify Connection Guide
-                      <ExternalLink className="h-3 w-3 ml-1" />
-                    </a>
-                  </Button>
-                </Step>
-                
-                <Step number={5} title="Set Up API Endpoints">
-                  <p className="text-muted-foreground mb-4">
-                    Create the necessary API endpoints in Gadget.dev to expose functionality to the frontend.
-                  </p>
-                  <div className="grid grid-cols-1 gap-2 mb-4">
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                      <p className="text-sm">Create API routes for product processing</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                      <p className="text-sm">Set up authentication with API keys</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                      <p className="text-sm">Configure webhooks for real-time updates</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
-                    <a href="https://gadget.dev/docs/api" target="_blank" rel="noopener noreferrer">
-                      View API Configuration Guide
-                      <ExternalLink className="h-3 w-3 ml-1" />
-                    </a>
-                  </Button>
-                </Step>
-                
-                <Step number={6} title="Test and Deploy">
-                  <p className="text-muted-foreground mb-4">
-                    Thoroughly test the application and deploy it to production.
-                  </p>
-                  <div className="grid grid-cols-1 gap-2 mb-4">
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                      <p className="text-sm">Test API endpoints with sample product data</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                      <p className="text-sm">Verify processing logic works correctly</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                      <p className="text-sm">Deploy to production environment</p>
-                    </div>
-                  </div>
-                  <Button variant="primary" size="sm" className="flex items-center gap-2">
-                    Deploy to Production
-                  </Button>
-                </Step>
+          <Separator />
+          
+          <div>
+            <h3 className="text-lg font-medium mb-4">Key Gadget.dev Features to Utilize</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="border rounded-md p-4">
+                <h4 className="font-medium text-sm mb-2">Connections</h4>
+                <p className="text-xs text-muted-foreground">
+                  Use Gadget's built-in Shopify connection to handle authentication, API access, and webhooks automatically.
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </section>
+              
+              <div className="border rounded-md p-4">
+                <h4 className="font-medium text-sm mb-2">Actions</h4>
+                <p className="text-xs text-muted-foreground">
+                  Implement the PreProduct logic as Gadget actions to encapsulate business logic with proper validation.
+                </p>
+              </div>
+              
+              <div className="border rounded-md p-4">
+                <h4 className="font-medium text-sm mb-2">Effects</h4>
+                <p className="text-xs text-muted-foreground">
+                  Use Effects to automatically trigger PreProduct processing when product data changes.
+                </p>
+              </div>
+              
+              <div className="border rounded-md p-4">
+                <h4 className="font-medium text-sm mb-2">Global State</h4>
+                <p className="text-xs text-muted-foreground">
+                  Store configuration settings using Gadget's Global State feature for app-wide settings.
+                </p>
+              </div>
+              
+              <div className="border rounded-md p-4">
+                <h4 className="font-medium text-sm mb-2">Environment Variables</h4>
+                <p className="text-xs text-muted-foreground">
+                  Use Gadget's environment variables for API keys and configuration instead of hardcoding.
+                </p>
+              </div>
+              
+              <div className="border rounded-md p-4">
+                <h4 className="font-medium text-sm mb-2">Role-Based Access</h4>
+                <p className="text-xs text-muted-foreground">
+                  Implement proper permissions using Gadget's role-based access control for API endpoints.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
 export default GadgetTransferGuide;
-
-// Helper components for the steps
-interface StepProps {
-  number: number;
-  title: string;
-  children: React.ReactNode;
-}
-
-const Steps: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <div className="space-y-10">{children}</div>;
-};
-
-const Step: React.FC<StepProps> = ({ number, title, children }) => {
-  return (
-    <div className="relative pl-10 pb-8 border-l border-gray-200 last:border-l-0 last:pb-0">
-      <div className="absolute top-0 left-0 -translate-x-1/2 bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center">
-        {number}
-      </div>
-      <h3 className="text-lg font-medium mb-3">{title}</h3>
-      <div className="text-sm">{children}</div>
-    </div>
-  );
-};
