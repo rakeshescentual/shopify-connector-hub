@@ -55,13 +55,15 @@ This app is designed to meet all [Shopify Plus Certification Program requirement
 
 ## Integration with Gadget.dev
 
-This application is prepared for transfer to Gadget.dev with:
+### Latest Gadget Features Used
 
-- Clean separation of business logic and UI
-- TypeScript interfaces for all data models
-- Comprehensive error handling and status tracking
-- Well-documented processing rules
-- API structure that maps to Gadget.dev models and actions
+This application is optimized for the latest Gadget.dev features:
+
+- **Enhanced Effect Builder**: For real-time validation and improved error handling
+- **Field-Level Permissions**: Granular access control for sensitive data
+- **Environment Variable Management**: Secure handling of API keys and secrets
+- **TypeScript Integration**: Leveraging auto-generated types for type safety
+- **Performance Optimizations**: Following Gadget's latest best practices
 
 For detailed instructions on transitioning to Gadget.dev, see the [Developer Documentation](/documentation) page in the application.
 

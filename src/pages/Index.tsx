@@ -8,7 +8,7 @@ import ConfigSection from '@/components/ConfigSection';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { BookOpen, Play, FileText, Server } from 'lucide-react';
+import { BookOpen, Play, FileText, Server, Sparkles } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -44,12 +44,22 @@ const Index = () => {
                 Developer Docs
               </Link>
             </Button>
-            <Button asChild size="lg" variant="default" className="gap-2 bg-emerald-600 hover:bg-emerald-700">
-              <a href="https://docs.gadget.dev/" target="_blank" rel="noopener noreferrer">
-                <Server size={18} />
-                Gadget.dev Docs
-              </a>
-            </Button>
+          </div>
+          
+          <div className="mt-8 bg-gradient-to-r from-emerald-50 to-emerald-100 p-6 rounded-lg shadow-sm max-w-3xl mx-auto">
+            <div className="flex flex-col items-center">
+              <Sparkles className="h-8 w-8 text-emerald-600 mb-3" />
+              <h3 className="text-xl font-semibold text-emerald-800 mb-2">Gadget.dev Ready</h3>
+              <p className="text-emerald-700 text-sm mb-4 max-w-xl">
+                This application is optimized for the latest Gadget.dev features including Enhanced Effects, Field-Level Permissions, and TypeScript integration.
+              </p>
+              <Button asChild size="lg" variant="default" className="gap-2 bg-emerald-600 hover:bg-emerald-700">
+                <a href="https://docs.gadget.dev/" target="_blank" rel="noopener noreferrer">
+                  <Server size={18} />
+                  Explore Gadget.dev Docs
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </section>

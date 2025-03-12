@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { AlertCircle, Check, Code, ExternalLink } from 'lucide-react';
+import { AlertCircle, Check, Code, ExternalLink, Star, Zap, Sparkles } from 'lucide-react';
 
 const GadgetTransferGuide = () => {
   return (
@@ -34,6 +34,36 @@ const GadgetTransferGuide = () => {
           </Alert>
 
           <div>
+            <h3 className="text-lg font-medium mb-2">Latest Gadget.dev Features</h3>
+            <div className="bg-primary/5 border border-primary/10 rounded-md p-4 mb-6">
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <Sparkles className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Improved Effect Builder</span> - Enhanced effect builder with better real-time validation and error handling capabilities
+                  </div>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Sparkles className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Field-Level Permissions</span> - More granular control over field-level access for different user roles
+                  </div>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Sparkles className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Environment Variables</span> - Enhanced environment variable management with secret handling
+                  </div>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Sparkles className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">TypeScript Improvements</span> - Better TypeScript integration with automatic type generation
+                  </div>
+                </li>
+              </ul>
+            </div>
+          
             <h3 className="text-lg font-medium mb-4">Migration Steps</h3>
             
             <div className="space-y-4">
@@ -84,6 +114,12 @@ const GadgetTransferGuide = () => {
                       </li>
                     </ul>
                   </div>
+                  <div className="mt-2 border border-green-100 bg-green-50 rounded-md p-2 flex items-start">
+                    <Star className="text-amber-500 h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-green-800">
+                      Leverage Gadget's new Field-Level Permissions to control access to sensitive fields like API keys.
+                    </p>
+                  </div>
                 </div>
               </div>
               
@@ -112,11 +148,10 @@ const GadgetTransferGuide = () => {
                       </li>
                     </ul>
                   </div>
-                  <div className="border border-green-100 bg-green-50 rounded-md p-2 mt-3 flex items-start">
-                    <Check className="text-green-600 h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-green-800">
-                      The processing logic in this app is already structured to be easily ported
-                      to Gadget actions with minimal changes needed.
+                  <div className="border border-amber-100 bg-amber-50 rounded-md p-2 mt-3 flex items-start">
+                    <Zap className="text-amber-600 h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-amber-800">
+                      Use Gadget's improved Effect Builder with enhanced validation to ensure your effects fire correctly when inventory changes.
                     </p>
                   </div>
                 </div>
@@ -157,12 +192,12 @@ const GadgetTransferGuide = () => {
                 <div>
                   <h4 className="font-medium text-base">Frontend Integration</h4>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Update the frontend to use the Gadget API endpoints.
+                    Update the frontend to use the Gadget API endpoints and leverage the JavaScript client.
                   </p>
                   <div className="mt-2 bg-muted p-3 rounded-md">
                     <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
                       <li>
-                        Use Gadget's JavaScript client in the frontend application
+                        Use Gadget's JavaScript client with automatic TypeScript type generation
                       </li>
                       <li>
                         Update API call paths in the simulator to point to your Gadget app
@@ -205,46 +240,88 @@ const GadgetTransferGuide = () => {
             <h3 className="text-lg font-medium mb-4">Key Gadget.dev Features to Utilize</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="border rounded-md p-4">
+              <div className="border rounded-md p-4 hover:bg-primary/5 transition-colors">
                 <h4 className="font-medium text-sm mb-2">Connections</h4>
                 <p className="text-xs text-muted-foreground">
                   Use Gadget's built-in Shopify connection to handle authentication, API access, and webhooks automatically.
                 </p>
               </div>
               
-              <div className="border rounded-md p-4">
+              <div className="border rounded-md p-4 hover:bg-primary/5 transition-colors">
                 <h4 className="font-medium text-sm mb-2">Actions</h4>
                 <p className="text-xs text-muted-foreground">
                   Implement the PreProduct logic as Gadget actions to encapsulate business logic with proper validation.
                 </p>
               </div>
               
-              <div className="border rounded-md p-4">
+              <div className="border rounded-md p-4 hover:bg-primary/5 transition-colors">
                 <h4 className="font-medium text-sm mb-2">Effects</h4>
                 <p className="text-xs text-muted-foreground">
-                  Use Effects to automatically trigger PreProduct processing when product data changes.
+                  Use Effects with the improved Effect Builder to automatically trigger PreProduct processing when product data changes.
                 </p>
               </div>
               
-              <div className="border rounded-md p-4">
+              <div className="border rounded-md p-4 hover:bg-primary/5 transition-colors">
                 <h4 className="font-medium text-sm mb-2">Global State</h4>
                 <p className="text-xs text-muted-foreground">
                   Store configuration settings using Gadget's Global State feature for app-wide settings.
                 </p>
               </div>
               
-              <div className="border rounded-md p-4">
+              <div className="border rounded-md p-4 hover:bg-primary/5 transition-colors">
                 <h4 className="font-medium text-sm mb-2">Environment Variables</h4>
                 <p className="text-xs text-muted-foreground">
-                  Use Gadget's environment variables for API keys and configuration instead of hardcoding.
+                  Use Gadget's enhanced environment variables system for API keys with proper secret management.
                 </p>
               </div>
               
-              <div className="border rounded-md p-4">
-                <h4 className="font-medium text-sm mb-2">Role-Based Access</h4>
+              <div className="border rounded-md p-4 hover:bg-primary/5 transition-colors">
+                <h4 className="font-medium text-sm mb-2">Field-Level Permissions</h4>
                 <p className="text-xs text-muted-foreground">
-                  Implement proper permissions using Gadget's role-based access control for API endpoints.
+                  Implement granular field-level access control using Gadget's new permission system.
                 </p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-medium mb-4">Advanced Gadget.dev Integration</h3>
+            
+            <div className="space-y-4">
+              <div className="border rounded-md p-4">
+                <h4 className="font-medium text-sm flex items-center mb-2">
+                  <Sparkles className="h-4 w-4 text-primary mr-2" />
+                  TypeScript Integration
+                </h4>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Leverage Gadget's improved TypeScript support for auto-generated types:
+                </p>
+                <pre className="bg-muted p-2 rounded text-xs overflow-x-auto">
+{`// Example of using Gadget.dev's auto-generated types
+import { api, models } from "./gadget";
+
+// Type-safe model operations
+async function fetchProducts(): Promise<models.Product[]> {
+  const products = await api.product.findMany();
+  return products;
+}`}
+                </pre>
+              </div>
+              
+              <div className="border rounded-md p-4">
+                <h4 className="font-medium text-sm flex items-center mb-2">
+                  <Sparkles className="h-4 w-4 text-primary mr-2" />
+                  Effect Integration
+                </h4>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Configure product status updates using Gadget's Effect system:
+                </p>
+                <div className="bg-muted p-2 rounded text-xs">
+                  <p className="mb-1">1. Create an Effect that triggers on ProductVariant inventory changes</p>
+                  <p className="mb-1">2. Call the <code>processVariant</code> action with the updated inventory data</p>
+                  <p className="mb-1">3. Run the <code>applyPreProductLogic</code> action on the parent Product</p>
+                  <p>4. Set appropriate conditions to prevent infinite loops</p>
+                </div>
               </div>
             </div>
           </div>
