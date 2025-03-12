@@ -51,7 +51,8 @@ const Index = () => {
               <Sparkles className="h-8 w-8 text-emerald-600 mb-3" />
               <h3 className="text-xl font-semibold text-emerald-800 mb-2">Gadget.dev Ready</h3>
               <p className="text-emerald-700 text-sm mb-4 max-w-xl">
-                This application is optimized for the latest Gadget.dev features including Enhanced Effects, Field-Level Permissions, and TypeScript integration.
+                This application is optimized for the latest Gadget.dev features including Enhanced Effect Builder, 
+                Field-Level Permissions, improved TypeScript integration, and Action Builder enhancements.
               </p>
               <Button asChild size="lg" variant="default" className="gap-2 bg-emerald-600 hover:bg-emerald-700">
                 <a href="https://docs.gadget.dev/" target="_blank" rel="noopener noreferrer">

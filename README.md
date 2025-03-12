@@ -59,11 +59,12 @@ This app is designed to meet all [Shopify Plus Certification Program requirement
 
 This application is optimized for the latest Gadget.dev features:
 
-- **Enhanced Effect Builder**: For real-time validation and improved error handling
-- **Field-Level Permissions**: Granular access control for sensitive data
-- **Environment Variable Management**: Secure handling of API keys and secrets
-- **TypeScript Integration**: Leveraging auto-generated types for type safety
-- **Performance Optimizations**: Following Gadget's latest best practices
+- **Enhanced Effect Builder**: For real-time validation, debugging, and improved error handling
+- **Field-Level Permissions**: Granular, role-based access control for sensitive data
+- **Environment Variables**: Secure handling of API keys with improved secret rotation
+- **TypeScript Integration**: Leveraging auto-generated types with full type safety
+- **Action Builder Improvements**: Better validation, error handling, and execution monitoring
+- **Connection Enhancements**: Improved Shopify connection with automatic rate limiting and webhook handling
 
 For detailed instructions on transitioning to Gadget.dev, see the [Developer Documentation](/documentation) page in the application.
 
