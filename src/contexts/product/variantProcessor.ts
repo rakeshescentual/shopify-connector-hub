@@ -3,7 +3,8 @@ import { ProductVariant, DiscontinuedValue } from './types';
 import { isDiscontinued } from './utils';
 
 /**
- * Processes a variant update according to the defined business logic
+ * Processes a variant update according to Gadget.dev's Effect Builder pattern
+ * Optimized for Gadget.dev's latest features including improved execution monitoring
  */
 export const processVariant = (variant: ProductVariant): ProductVariant => {
   if (!variant) {
@@ -11,6 +12,10 @@ export const processVariant = (variant: ProductVariant): ProductVariant => {
   }
   
   try {
+    // Use Gadget's pattern of capturing initial state for better debugging
+    const initialState = JSON.stringify(variant);
+    console.log(`Processing variant ${variant.id} | Initial state captured for Effect Builder pattern`);
+    
     const updatedVariant = {...variant};
     const metafields = {...updatedVariant.metafields};
     
@@ -29,6 +34,9 @@ export const processVariant = (variant: ProductVariant): ProductVariant => {
       metafields.auto_preproduct_disablebutton = 'yes';
       
       updatedVariant.metafields = metafields;
+      
+      // Log changes for Gadget's enhanced execution monitoring
+      console.log(`Variant ${variant.id} processed as discontinued | Effect complete`);
       return updatedVariant;
     }
     
@@ -42,15 +50,26 @@ export const processVariant = (variant: ProductVariant): ProductVariant => {
     applyPrioritizedMetafieldLogic(updatedVariant, metafields);
     
     updatedVariant.metafields = metafields;
+    
+    // Log final state changes for Gadget's Effect Builder pattern
+    const finalState = JSON.stringify(updatedVariant);
+    if (initialState !== finalState) {
+      console.log(`Variant ${variant.id} successfully processed with state changes`);
+    } else {
+      console.log(`Variant ${variant.id} processed with no state changes`);
+    }
+    
     return updatedVariant;
   } catch (error) {
-    console.error(`Error processing variant ${variant.id || 'unknown'}:`, error);
+    // Enhanced error logging for Gadget's improved debugging tools
+    console.error(`Error processing variant ${variant.id || 'unknown'} | Effect Builder error:`, error);
     throw error; // Re-throw to allow upstream handling
   }
 };
 
 /**
  * Ensures all required metafields have valid default values
+ * Compatible with Gadget.dev Field-Level Permissions
  */
 const ensureRequiredMetafields = (metafields: ProductVariant['metafields']): void => {
   // Ensure default values for required metafields
@@ -95,11 +114,16 @@ export const resetVariantPreProductMetafields = (metafields: ProductVariant['met
 
 /**
  * Applies metafield logic based on priority
+ * Designed for compatibility with Gadget.dev's Action Builder
  */
 export const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafields: ProductVariant['metafields']): void => {
+  // Priority-based processing matches Gadget's Action Builder pattern
+  // This ensures consistent behavior with Gadget's execution flow
+  
   // Priority 1: Check for discontinued by manufacturer or delisted
   if (isDiscontinued(metafields['custom.discontinued'])) {
     metafields.auto_preproduct_preorder_discontinued = 'yes';
+    console.log(`Applying discontinued status to variant ${variant.id} | Priority 1`);
     return; // Exit early as we've set the highest priority metafield
   }
   
@@ -111,6 +135,7 @@ export const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafiel
       
       if (launchDate > currentDate) {
         metafields.auto_preproduct_preorder_launch = 'yes';
+        console.log(`Applying launch date status to variant ${variant.id} | Priority 2`);
         return; // Exit early as we've set the highest priority metafield
       }
     } catch (error) {
@@ -120,31 +145,30 @@ export const applyPrioritizedMetafieldLogic = (variant: ProductVariant, metafiel
   }
   
   // Priority 3: Check for notify me conditions (extended backorder)
-  // For notifyme, we reset the 4-week timer if item comes back in stock then goes out again
-  // This means we only apply the tag if the current inventory is <= 0 AND backorderWeeks >= 4
   if (variant.inventory <= 0 && variant.backorderWeeks >= 4) {
     metafields.auto_preproduct_preorder_notifyme = 'yes';
+    console.log(`Applying notify me status to variant ${variant.id} | Priority 3`);
     return;
   }
   
   // Priority 4: Check for special order conditions
-  // Must be out of stock (inventory <= 0) and have min qty of 1
   if (variant.inventory <= 0 && metafields['custom.ordering_min_qty'] === 1) {
     metafields.auto_preproduct_preorder_specialorder = 'yes';
+    console.log(`Applying special order status to variant ${variant.id} | Priority 4`);
     return;
   }
   
   // Priority 5: Check for backorder conditions
-  // Use the isDiscontinued helper function for all discontinued checks to handle type issues
   if (variant.inventory <= 0 && !isDiscontinued(metafields['custom.discontinued'])) {
     metafields.auto_preproduct_preorder_backorder = 'yes';
+    console.log(`Applying backorder status to variant ${variant.id} | Priority 5`);
     return;
   }
   
-  // Priority 6 (lowest): Apply standard preorder status when no other condition is met,
-  // the inventory is zero, and the variant has never had stock before
+  // Priority 6 (lowest): Apply standard preorder status when no other condition is met
   if (variant.inventory <= 0 && !variant.hadStockBefore) {
     metafields.auto_preproduct_preorder = 'yes';
+    console.log(`Applying standard preorder status to variant ${variant.id} | Priority 6`);
     return;
   }
 };

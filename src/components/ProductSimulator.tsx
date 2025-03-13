@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { ProductProvider } from '@/contexts/ProductContext';
 import ProductForm from '@/components/product-simulator/ProductForm';
 import ProductPreview from '@/components/product-simulator/ProductPreview';
-import { AlertCircle, CheckCircle, Info, Lightbulb, Tag } from 'lucide-react';
+import ScheduleBuilderDemo from '@/components/product-simulator/ScheduleBuilderDemo';
+import { AlertCircle, CheckCircle, Info, Lightbulb, Tag, Clock } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import ContextualHelp from '@/components/product-simulator/ContextualHelp';
@@ -22,7 +22,7 @@ const ProductSimulator = () => {
         </div>
 
         <Tabs defaultValue="instructions" className="max-w-6xl mx-auto mb-8">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="instructions" className="flex items-center gap-1">
               <Info className="h-4 w-4" /> Instructions
             </TabsTrigger>
@@ -34,6 +34,9 @@ const ProductSimulator = () => {
             </TabsTrigger>
             <TabsTrigger value="tutorial" className="flex items-center gap-1">
               <Lightbulb className="h-4 w-4" /> Tutorial
+            </TabsTrigger>
+            <TabsTrigger value="schedule" className="flex items-center gap-1">
+              <Clock className="h-4 w-4" /> Gadget Scheduler
             </TabsTrigger>
           </TabsList>
           
@@ -184,6 +187,14 @@ const ProductSimulator = () => {
                     </p>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="schedule">
+            <Card>
+              <CardContent className="pt-6">
+                <ScheduleBuilderDemo />
               </CardContent>
             </Card>
           </TabsContent>
