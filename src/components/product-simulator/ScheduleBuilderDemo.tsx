@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,8 +46,7 @@ const ScheduleBuilderDemo = () => {
       toast({
         title: "Update Complete",
         description: "All products have been processed successfully.",
-        // Changed from "success" to "default" as "success" is not a valid variant
-        variant: "default"
+        variant: "default",
       });
     }, 1500);
   };
