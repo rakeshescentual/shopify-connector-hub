@@ -47,7 +47,8 @@ const ScheduleBuilderDemo = () => {
       toast({
         title: "Update Complete",
         description: "All products have been processed successfully.",
-        variant: "success",
+        // Changed from "success" to "default" as "success" is not a valid variant
+        variant: "default"
       });
     }, 1500);
   };

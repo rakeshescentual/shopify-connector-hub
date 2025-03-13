@@ -103,12 +103,12 @@ export const prepareProductForGadgetGraphQL = (product: Product): Record<string,
     id: product.id,
     title: product.title,
     tags: product.tags,
-    status: product.status,
+    // Remove status property as it doesn't exist on Product type
     auto_quickbuydisable: product.auto_quickbuydisable,
     variants: product.variants.map(variant => ({
       id: variant.id,
       title: variant.title,
-      sku: variant.sku,
+      // Remove sku property as it doesn't exist on ProductVariant type
       inventory: variant.inventory,
       status: variant.status,
       metafields: { ...variant.metafields },
