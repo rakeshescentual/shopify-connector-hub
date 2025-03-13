@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Sparkles, Check, Zap } from 'lucide-react';
+import { Sparkles, Check, Zap, Database, Shield, Code, Clock, Braces } from 'lucide-react';
 
 type FeatureProps = {
   title: string;
@@ -62,39 +62,39 @@ const Feature = ({ title, description, icon = <Sparkles className="h-4 w-4 text-
 const GadgetFeatures = () => {
   const latestFeatures = [
     {
+      title: "GraphQL API Builder",
+      description: "Create custom GraphQL APIs with full type safety, comprehensive filtering, and enhanced performance",
+      icon: <Database />,
+      variant: "new" as const
+    },
+    {
       title: "Enhanced Effect Builder",
       description: "Improved real-time validation with detailed debugging tools and execution monitoring",
-      icon: <Sparkles />,
+      icon: <Zap />,
       variant: "new" as const
     },
     {
       title: "Field-Level Permissions",
       description: "Granular, role-based access control with enhanced security rules for sensitive data",
-      icon: <Sparkles />,
+      icon: <Shield />,
       variant: "new" as const
     },
     {
       title: "TypeScript Integration",
       description: "Auto-generated types with full type safety and enhanced schema validation",
-      icon: <Sparkles />,
+      icon: <Code />,
+      variant: "new" as const
+    },
+    {
+      title: "Schedule Builder",
+      description: "Create time-based jobs with improved monitoring, reliability, and scheduling options",
+      icon: <Clock />,
       variant: "new" as const
     },
     {
       title: "Action Builder Improvements",
       description: "Better validation, error handling, and execution monitoring with detailed logs",
-      icon: <Sparkles />,
-      variant: "new" as const
-    },
-    {
-      title: "GraphQL API Builder",
-      description: "Create custom GraphQL APIs with full type safety and enhanced performance",
-      icon: <Sparkles />,
-      variant: "new" as const
-    },
-    {
-      title: "Schedule Builder",
-      description: "For creating time-based jobs with improved monitoring and reliability",
-      icon: <Sparkles />,
+      icon: <Braces />,
       variant: "new" as const
     }
   ];
@@ -168,7 +168,7 @@ const GadgetFeatures = () => {
         <Zap className="text-amber-600 h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
         <p className="text-xs text-amber-800">
           Use Gadget's improved Schedule Builder to automate product status updates and inventory synchronization
-          on customizable time intervals.
+          on customizable time intervals with enhanced reliability monitoring.
         </p>
       </div>
     </Card>

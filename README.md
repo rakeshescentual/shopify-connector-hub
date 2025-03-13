@@ -59,14 +59,15 @@ This app is designed to meet all [Shopify Plus Certification Program requirement
 
 This application is optimized for the latest Gadget.dev features:
 
+- **GraphQL API Builder**: Create custom GraphQL APIs with full type safety, comprehensive filtering options, and enhanced performance
 - **Enhanced Effect Builder**: For real-time validation with improved debugging tools and detailed execution monitoring
 - **Field-Level Permissions**: Granular, role-based access control for sensitive data with enhanced security rules
-- **Environment Variables**: Secure handling of API keys with improved secret rotation and versioning
 - **TypeScript Integration**: Leveraging auto-generated types with full type safety and enhanced schema validation
+- **Schedule Builder**: For creating time-based jobs with improved monitoring, reliability, and scheduling options
 - **Action Builder Improvements**: Better validation, error handling, and execution monitoring with detailed logs
 - **Connection Enhancements**: Improved Shopify connection with automatic rate limiting and webhook handling
-- **GraphQL API Builder**: Create custom GraphQL APIs with full type safety and enhanced performance
-- **Schedule Builder**: For creating time-based jobs with improved monitoring and reliability
+- **Environment Variables**: Secure handling of API keys with improved secret rotation and versioning
+- **Global State Management**: Enhanced caching and state management capabilities
 - **Improved Development Experience**: Enhanced local development workflow with better debugging and testing tools
 
 For detailed instructions on transitioning to Gadget.dev, see the [Developer Documentation](/documentation) page in the application.

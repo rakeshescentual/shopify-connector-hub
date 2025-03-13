@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Star, Zap, ExternalLink } from 'lucide-react';
+import { Star, Zap, ExternalLink, Database, Shield, Code, Braces } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const GadgetMigrationSteps = () => {
@@ -58,7 +58,7 @@ const GadgetMigrationSteps = () => {
               </ul>
             </div>
             <div className="mt-2 border border-green-100 bg-green-50 rounded-md p-2 flex items-start">
-              <Star className="text-amber-500 h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+              <Shield className="text-green-600 h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
               <p className="text-xs text-green-800">
                 Leverage Gadget's improved Field-Level Permissions to control access to sensitive fields like API keys.
               </p>
@@ -133,6 +133,12 @@ const GadgetMigrationSteps = () => {
                 </li>
               </ul>
             </div>
+            <div className="mt-2 border border-blue-100 bg-blue-50 rounded-md p-2 flex items-start">
+              <Database className="text-blue-600 h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-blue-800">
+                Take advantage of Gadget's new GraphQL API Builder for creating optimized, typed queries with enhanced filtering capabilities.
+              </p>
+            </div>
           </div>
         </div>
         
@@ -158,6 +164,12 @@ const GadgetMigrationSteps = () => {
                 </li>
               </ul>
             </div>
+            <div className="mt-2 border border-indigo-100 bg-indigo-50 rounded-md p-2 flex items-start">
+              <Code className="text-indigo-600 h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-indigo-800">
+                Utilize Gadget's enhanced TypeScript integration with auto-generated types for complete type safety in your frontend code.
+              </p>
+            </div>
             <div className="flex items-center gap-2 mt-3">
               <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                 <a 
@@ -179,6 +191,40 @@ const GadgetMigrationSteps = () => {
                   Gadget JS Client <ExternalLink size={12} />
                 </a>
               </Badge>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex items-start">
+          <div className="flex-shrink-0 bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-0.5">
+            6
+          </div>
+          <div>
+            <h4 className="font-medium text-base">Implement Scheduled Jobs</h4>
+            <p className="text-sm text-muted-foreground mt-1">
+              Set up automated tasks using Gadget's enhanced Schedule Builder.
+            </p>
+            <div className="mt-2 bg-muted p-3 rounded-md">
+              <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
+                <li>
+                  Create a daily job to check for products with approaching launch dates
+                </li>
+                <li>
+                  Set up hourly inventory synchronization for high-volume stores
+                </li>
+                <li>
+                  Implement a weekly cleanup job for obsolete product data
+                </li>
+                <li>
+                  Configure proper error handling and notifications for all scheduled jobs
+                </li>
+              </ul>
+            </div>
+            <div className="mt-2 border border-purple-100 bg-purple-50 rounded-md p-2 flex items-start">
+              <Braces className="text-purple-600 h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-purple-800">
+                Use Gadget's advanced Schedule Builder features like improved reliability monitoring and flexible scheduling options.
+              </p>
             </div>
           </div>
         </div>
