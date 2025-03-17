@@ -158,6 +158,10 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   );
 };
 
-export const useProduct = () => useContext(ProductContext);
+// Export the hook
+export const useProductContext = () => useContext(ProductContext);
+
+// Re-export types from the types file for convenience
+export type { Product, ProductVariant, ProductContextType };
 
 export default ProductContext;
