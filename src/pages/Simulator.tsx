@@ -3,7 +3,7 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ProductSimulator from '@/components/ProductSimulator';
-import { Cpu, Info, FileText, ArrowRight } from 'lucide-react';
+import { Cpu, Info, FileText, ArrowRight, Database } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -40,6 +40,9 @@ const Simulator = () => {
                 <p className="mt-2 text-blue-600 dark:text-blue-400">
                   Start by modifying a variant or creating a new one, then click "Apply PreProduct Logic" to see the results.
                 </p>
+                <p className="mt-2 text-blue-600 dark:text-blue-400">
+                  <strong>New:</strong> Check out the Shopify Assistant tab for AI-powered recommendations from Shopify's MCP server.
+                </p>
               </div>
             </div>
 
@@ -56,12 +59,26 @@ const Simulator = () => {
                   <ArrowRight className="h-3 w-3 ml-1" />
                 </a>
               </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-xs flex items-center gap-1 bg-blue-50"
+                asChild
+              >
+                <a href="#shopify">
+                  <Database className="h-3 w-3" />
+                  Try Shopify Assistant
+                  <ArrowRight className="h-3 w-3 ml-1" />
+                </a>
+              </Button>
 
               <Tabs defaultValue="overview" className="w-full mt-4">
-                <TabsList className="grid w-full grid-cols-3 md:w-auto">
+                <TabsList className="grid w-full grid-cols-4 md:w-auto">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="status-guide">Status Guide</TabsTrigger>
                   <TabsTrigger value="examples">Examples</TabsTrigger>
+                  <TabsTrigger value="shopify">Shopify Integration</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="overview" className="p-3 text-xs bg-card/50 rounded-md mt-2">
@@ -93,6 +110,15 @@ const Simulator = () => {
                     <li>Extended backorder (4+ weeks): Displays "Notify Me"</li>
                     <li>Mixed inventory variants: May disable quick buy</li>
                   </ul>
+                </TabsContent>
+                
+                <TabsContent value="shopify" className="p-3 text-xs bg-card/50 rounded-md mt-2">
+                  <h3 className="font-medium mb-1">Shopify MCP Integration</h3>
+                  <p className="text-muted-foreground">
+                    Our new Shopify Developer Assistant uses the Merchant Config Platform (MCP) server to provide
+                    AI-powered recommendations based on your product configuration. Test how your PreProduct settings
+                    will behave across different Shopify themes and get optimization suggestions.
+                  </p>
                 </TabsContent>
               </Tabs>
             </div>

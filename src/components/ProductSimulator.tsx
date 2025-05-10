@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { ProductProvider } from '@/contexts/ProductContext';
 import ProductForm from '@/components/product-simulator/ProductForm';
 import ProductPreview from '@/components/product-simulator/ProductPreview';
 import ScheduleBuilderDemo from '@/components/product-simulator/ScheduleBuilderDemo';
-import { AlertCircle, CheckCircle, Info, Lightbulb, Tag, Clock } from 'lucide-react';
+import ShopifyDevAssistant from '@/components/product-simulator/ShopifyDevAssistant';
+import { AlertCircle, CheckCircle, Info, Lightbulb, Tag, Clock, Database } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import ContextualHelp from '@/components/product-simulator/ContextualHelp';
@@ -22,7 +24,7 @@ const ProductSimulator = () => {
         </div>
 
         <Tabs defaultValue="instructions" className="max-w-6xl mx-auto mb-8">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="instructions" className="flex items-center gap-1">
               <Info className="h-4 w-4" /> Instructions
             </TabsTrigger>
@@ -37,6 +39,9 @@ const ProductSimulator = () => {
             </TabsTrigger>
             <TabsTrigger value="schedule" className="flex items-center gap-1">
               <Clock className="h-4 w-4" /> Gadget Scheduler
+            </TabsTrigger>
+            <TabsTrigger value="shopify" className="flex items-center gap-1">
+              <Database className="h-4 w-4" /> Shopify Assistant
             </TabsTrigger>
           </TabsList>
           
@@ -195,6 +200,14 @@ const ProductSimulator = () => {
             <Card>
               <CardContent className="pt-6">
                 <ScheduleBuilderDemo />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="shopify">
+            <Card>
+              <CardContent className="pt-6">
+                <ShopifyDevAssistant />
               </CardContent>
             </Card>
           </TabsContent>
