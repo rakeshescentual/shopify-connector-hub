@@ -11,7 +11,7 @@ const MetafieldsTab = () => {
 
   if (!editableVariant) return null;
   
-  const handleMetafieldChange = (key: string, value: string) => {
+  const handleMetafieldChange = (key: string, value: string | number) => {
     handleVariantChange(`metafields.${key}`, value);
   };
 
@@ -31,7 +31,7 @@ const MetafieldsTab = () => {
             <MetafieldItem 
               key={key} 
               fieldKey={key} 
-              value={value} 
+              value={String(value)} 
               onChange={handleMetafieldChange} 
             />
           ))
@@ -44,7 +44,7 @@ const MetafieldsTab = () => {
 interface MetafieldItemProps {
   fieldKey: string;
   value: string;
-  onChange: (key: string, value: string) => void;
+  onChange: (key: string, value: string | number) => void;
 }
 
 const MetafieldItem: React.FC<MetafieldItemProps> = ({ fieldKey, value, onChange }) => {
@@ -67,17 +67,19 @@ const MetafieldItem: React.FC<MetafieldItemProps> = ({ fieldKey, value, onChange
         <Label htmlFor={`variant-${fieldKey}`} className="text-sm font-medium">
           {fieldKey.replace('auto_', '').replace(/_/g, ' ')}
         </Label>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Info size={14} className="text-muted-foreground cursor-help" />
-          </TooltipTrigger>
-          <TooltipContent side="right">
-            {getTooltipText(fieldKey)}
-          </TooltipContent>
-        </Tooltip>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info size={14} className="text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              {getTooltipText(fieldKey)}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       <Select 
-        value={String(value)}
+        value={value}
         onValueChange={(newValue) => onChange(fieldKey, newValue)}
       >
         <SelectTrigger id={`variant-${fieldKey}`} className="w-28 bg-white">
